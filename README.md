@@ -47,3 +47,9 @@ npm run build
 ## Image protection
 
 The site suppresses ordinary image dragging, context menus, and direct full-size image presentation in the inspector. These are deterrents only. Any pixels delivered to a browser can still be extracted through developer tools or captured in a screenshot, so the repository intentionally contains web derivatives rather than valuable originals.
+
+## Copyright and use
+
+Copyright © 2026 Beewaker / BewakerCorp. All rights reserved.
+
+The website code, design, text, artwork, and renders may not be copied, reposted, modified, distributed, sold, or used for artificial-intelligence or machine-learning systems without prior written permission. Rights in third-party characters remain with their respective owners. See the [LICENSE](LICENSE) file for the complete terms.
