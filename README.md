@@ -1,5 +1,7 @@
 # Beewaker Art Archive
 
+[Open the live portfolio](https://bewakercorp.github.io/beewaker-portfolio/)
+
 A lightweight artwork portfolio with a masonry gallery and a two-sided 3D inspection view. The site is built with Vite and Three.js and published automatically through GitHub Pages.
 
 ## Add an artwork
