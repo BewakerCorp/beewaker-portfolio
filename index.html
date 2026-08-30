@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Beewaker's character art, illustrations, and 3D renders — an archive focused on design, mood, and atmosphere."
+    />
+    <meta name="theme-color" content="#090a09" />
+    <title>Beewaker — Art Archive</title>
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="archive-header" aria-label="Primary navigation">
+        <a class="archive-mark" href="#" data-nav-target="home" aria-label="Return to the archive entrance">
+          <span class="archive-mark__signal" aria-hidden="true"></span>
+          <span>BEEWAKER</span>
+          <small>ART ARCHIVE</small>
+        </a>
+
+        <nav class="archive-nav">
+          <a href="#portfolio" data-nav-target="portfolio">Portfolio</a>
+          <a href="#socials" data-nav-target="socials">Networks</a>
+        </nav>
+      </header>
+
+      <main>
+        <section class="screen screen--home" data-section="home" aria-labelledby="home-title">
+          <div class="home-grid" aria-hidden="true"></div>
+          <div class="home-copy">
+            <p class="eyebrow"><span>Archive online</span><span>Est. 2026</span></p>
+            <h1 id="home-title">Things found<br />in the <em>dark.</em></h1>
+            <p class="home-intro">
+              Just a small artist drawing whatever catches my interest. Mostly character portraits and
+              full-body pieces, playing around with design, mood, and atmosphere — with occasional 3D renders
+              of my own characters.
+            </p>
+
+            <div class="home-actions" aria-label="Choose a destination">
+              <a class="archive-button archive-button--primary" href="#portfolio" data-nav-target="portfolio">
+                <span>01</span>
+                <strong>Open portfolio</strong>
+                <i aria-hidden="true">↗</i>
+              </a>
+              <a class="archive-button" href="#socials" data-nav-target="socials">
+                <span>02</span>
+                <strong>Social networks</strong>
+                <i aria-hidden="true">↗</i>
+              </a>
+            </div>
+          </div>
+
+          <aside class="home-status" aria-label="Archive status">
+            <span>STATUS</span>
+            <strong>AVAILABLE FOR INSPECTION</strong>
+            <span class="home-status__rule"></span>
+            <small>Character art / illustration / 3D</small>
+          </aside>
+        </section>
+
+        <section class="screen screen--portfolio" data-section="portfolio" aria-labelledby="portfolio-title" hidden>
+          <header class="section-heading">
+            <div>
+              <p class="eyebrow">Stored material / visual records</p>
+              <h1 id="portfolio-title">Portfolio</h1>
+            </div>
+            <p>Select an artwork to inspect it.</p>
+          </header>
+
+          <div id="gallery" class="gallery-state" aria-live="polite">
+            <span class="loader-mark" aria-hidden="true"></span>
+            <p>The archive is being indexed.</p>
+          </div>
+        </section>
+
+        <section class="screen screen--socials" data-section="socials" aria-labelledby="socials-title" hidden>
+          <div class="socials-panel">
+            <p class="eyebrow">External signals</p>
+            <h1 id="socials-title">Social networks</h1>
+            <p class="socials-intro">
+              This node is reserved for TikTok, Art Fight, Telegram, and other places where the archive leaks
+              into the outside world.
+            </p>
+            <p class="socials-note">Links will be connected after the main gallery is online.</p>
+          </div>
+        </section>
+      </main>
+
+      <footer class="archive-footer">
+        <span>© BEEWAKER</span>
+        <span>NO SOURCE FILES STORED HERE</span>
+      </footer>
+    </div>
+
+    <dialog id="art-inspector" class="inspector" aria-labelledby="inspector-title">
+      <article class="inspector__window">
+        <header class="inspector__header">
+          <span class="inspector__index">OBJECT INSPECTION / <i>ACTIVE</i></span>
+          <h2 id="inspector-title" data-inspector-title>Visual record</h2>
+          <button class="inspector__close" type="button" data-inspector-close aria-label="Close artwork inspector">
+            <span>Close</span>
+            <i aria-hidden="true">×</i>
+          </button>
+        </header>
+
+        <div class="inspector__viewport" data-inspector-viewport>
+          <p class="inspector__status" data-inspector-status aria-live="polite">Loading visual record…</p>
+        </div>
+
+        <footer class="inspector__controls" aria-label="Artwork inspection controls">
+          <span><kbd>DRAG</kbd> ROTATE</span>
+          <span><kbd>SHIFT + DRAG</kbd> ROLL</span>
+          <span><kbd>DOUBLE CLICK</kbd> RESET</span>
+          <span><kbd>ESC</kbd> CLOSE</span>
+        </footer>
+      </article>
+    </dialog>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

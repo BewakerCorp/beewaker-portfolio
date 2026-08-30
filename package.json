@@ -1,0 +1,25 @@
+{
+  "name": "beewaker-portfolio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:gallery": "node scripts/build-gallery-manifest.mjs",
+    "predev": "npm run build:gallery",
+    "dev": "vite",
+    "prebuild": "npm run build:gallery",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "three": "0.180.0"
+  },
+  "devDependencies": {
+    "vite": "7.1.4",
+    "vitest": "3.2.4"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  }
+}
