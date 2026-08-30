@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.vite/
+coverage/
+public/gallery-manifest.json
+.DS_Store
+*.log
