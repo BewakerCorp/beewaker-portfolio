@@ -3,6 +3,7 @@ import './styles.css';
 import { loadGalleryManifest, renderGallery } from './gallery.js';
 import { createInspector } from './inspector.js';
 import { getSectionFromHash, navigateTo, renderSection } from './navigation.js';
+import { createSocialWeb } from './social-web.js';
 
 function syncSection() {
   renderSection(getSectionFromHash(window.location.hash));
@@ -22,12 +23,20 @@ syncSection();
 
 const galleryElement = document.querySelector('#gallery');
 const inspector = createInspector(document.querySelector('#art-inspector'), import.meta.env.BASE_URL);
+const socialWeb = createSocialWeb(document.querySelector('[data-social-web]'));
 
 document.addEventListener('artwork:select', (event) => {
   inspector.open(event.detail.item, event.detail.trigger);
 });
 
-window.addEventListener('pagehide', () => inspector.destroy(), { once: true });
+window.addEventListener(
+  'pagehide',
+  () => {
+    inspector.destroy();
+    socialWeb.destroy();
+  },
+  { once: true },
+);
 
 loadGalleryManifest(import.meta.env.BASE_URL)
   .then((items) => {
