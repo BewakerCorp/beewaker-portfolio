@@ -717,8 +717,7 @@ h1 {
 }
 
 .social-web {
-  position: absolute;
-  inset: 0;
+  position: relative;
   min-height: 520px;
   overflow: hidden;
   isolation: isolate;
