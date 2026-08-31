@@ -10,6 +10,14 @@ export function fitCardDimensions(imageWidth, imageHeight, maxSpan = 4) {
   };
 }
 
+export function fitInspectorSpan(cardWidth, cardHeight, viewportWidth, viewportHeight, margin = 1.15) {
+  const safeAspect = viewportWidth > 0 && viewportHeight > 0 ? viewportWidth / viewportHeight : 1;
+  const heightForCardHeight = cardHeight * margin;
+  const heightForCardWidth = (cardWidth * margin) / safeAspect;
+
+  return Number(Math.max(heightForCardHeight, heightForCardWidth).toFixed(4));
+}
+
 function resolveAsset(baseUrl, relativePath) {
   return `${baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`}${relativePath}`;
 }
@@ -230,7 +238,7 @@ export function createInspector(dialog, baseUrl = '/') {
         const width = Math.max(1, bounds.width);
         const height = Math.max(1, bounds.height);
         const aspect = width / height;
-        const span = 5;
+        const span = fitInspectorSpan(dimensions.width, dimensions.height, width, height);
         camera.left = (-span * aspect) / 2;
         camera.right = (span * aspect) / 2;
         camera.top = span / 2;
@@ -311,6 +319,8 @@ export function createInspector(dialog, baseUrl = '/') {
       renderer.domElement.addEventListener('wheel', onWheel, { passive: false });
       renderer.domElement.addEventListener('contextmenu', (event) => event.preventDefault());
       window.addEventListener('resize', resize);
+      const viewportObserver = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(resize);
+      viewportObserver?.observe(viewport);
       resize();
       animate();
       setStatus('', 'ready');
@@ -318,6 +328,7 @@ export function createInspector(dialog, baseUrl = '/') {
       cleanupScene = () => {
         cancelAnimationFrame(frameId);
         window.removeEventListener('resize', resize);
+        viewportObserver?.disconnect();
         renderer.domElement.removeEventListener('pointerdown', onPointerDown);
         renderer.domElement.removeEventListener('pointermove', onPointerMove);
         renderer.domElement.removeEventListener('pointerup', endPointer);

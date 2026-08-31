@@ -1,4 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+@font-face {
+  font-family: 'Triod Postnaja';
+  src: url('./assets/fonts/TriodPostnaja.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
 
 :root {
   color-scheme: dark;
@@ -17,6 +25,10 @@
   --blood: #7e2025;
   --blood-bright: #b33a3d;
   --signal: #9dae83;
+  --font-display: 'Triod Postnaja', Georgia, serif;
+  --text-micro: clamp(0.6875rem, 0.62rem + 0.12vw, 0.75rem);
+  --text-small: clamp(0.75rem, 0.68rem + 0.14vw, 0.875rem);
+  --text-body: clamp(0.9375rem, 0.85rem + 0.18vw, 1.0625rem);
 }
 
 * {
@@ -90,6 +102,7 @@ button:focus-visible {
   width: 100vw;
   max-width: none;
   height: 100vh;
+  height: 100dvh;
   max-height: none;
   margin: 0;
   padding: clamp(0.75rem, 2vw, 1.5rem);
@@ -115,6 +128,7 @@ button:focus-visible {
   grid-template-rows: auto minmax(0, 1fr) auto;
   width: min(1180px, 94vw);
   height: min(850px, 92vh);
+  height: min(850px, 92dvh);
   overflow: hidden;
   border: 1px solid var(--line-strong);
   background:
@@ -141,7 +155,7 @@ button:focus-visible {
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.13em;
-  font-size: 0.55rem;
+  font-size: var(--text-micro);
 }
 
 .inspector__index i {
@@ -158,7 +172,8 @@ button:focus-visible {
   text-transform: uppercase;
   white-space: nowrap;
   letter-spacing: 0.12em;
-  font-size: 0.62rem;
+  font-family: var(--font-display);
+  font-size: var(--text-small);
   font-weight: 500;
 }
 
@@ -172,7 +187,8 @@ button:focus-visible {
   text-transform: uppercase;
   letter-spacing: 0.13em;
   font: inherit;
-  font-size: 0.56rem;
+  font-family: var(--font-display);
+  font-size: var(--text-small);
   border: 1px solid var(--line);
   background: #11120f;
   cursor: pointer;
@@ -245,7 +261,7 @@ button:focus-visible {
   text-transform: uppercase;
   white-space: nowrap;
   letter-spacing: 0.14em;
-  font-size: 0.58rem;
+  font-size: var(--text-small);
   transform: translate(-50%, -50%);
 }
 
@@ -275,7 +291,7 @@ button:focus-visible {
   background: rgba(9, 10, 9, 0.82);
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  font-size: 0.5rem;
+  font-size: var(--text-micro);
 }
 
 .inspector__controls kbd {
@@ -291,14 +307,16 @@ button:focus-visible {
   color: var(--paper);
   text-decoration: none;
   letter-spacing: 0.13em;
-  font-size: 0.74rem;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: var(--text-small);
+  font-weight: 500;
 }
 
 .archive-mark small {
   grid-column: 2;
   color: var(--muted);
-  font-size: 0.52rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: var(--text-micro);
   letter-spacing: 0.17em;
 }
 
@@ -322,7 +340,8 @@ button:focus-visible {
   text-decoration: none;
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  font-size: 0.64rem;
+  font-family: var(--font-display);
+  font-size: var(--text-small);
 }
 
 .archive-nav a::after {
@@ -393,7 +412,7 @@ main {
   color: var(--signal);
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  font-size: 0.62rem;
+  font-size: var(--text-micro);
 }
 
 .eyebrow span + span::before {
@@ -405,27 +424,28 @@ main {
 h1 {
   margin: 0;
   color: var(--paper);
-  font-family: 'Instrument Serif', Georgia, serif;
-  font-weight: 400;
+  font-family: var(--font-display);
+  font-weight: 500;
 }
 
 .home-copy h1 {
   max-width: 780px;
   font-size: clamp(4.3rem, 10vw, 10.8rem);
-  line-height: 0.72;
-  letter-spacing: -0.055em;
+  line-height: 0.82;
+  letter-spacing: -0.025em;
 }
 
 .home-copy h1 em {
   color: var(--blood-bright);
-  font-weight: 400;
+  font-style: normal;
+  font-weight: 500;
 }
 
 .home-intro {
   max-width: 660px;
   margin: clamp(2.5rem, 6vw, 4.75rem) 0 0;
   color: #9b9b90;
-  font-size: clamp(0.78rem, 1.1vw, 0.93rem);
+  font-size: var(--text-body);
   line-height: 1.85;
 }
 
@@ -455,13 +475,14 @@ h1 {
 
 .archive-button span {
   color: var(--muted);
-  font-size: 0.58rem;
+  font-size: var(--text-micro);
 }
 
 .archive-button strong {
+  font-family: var(--font-display);
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-size: 0.69rem;
+  letter-spacing: 0.08em;
+  font-size: clamp(0.9rem, 0.82rem + 0.16vw, 1rem);
   font-weight: 500;
 }
 
@@ -492,12 +513,12 @@ h1 {
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.13em;
-  font-size: 0.54rem;
+  font-size: var(--text-micro);
 }
 
 .home-status strong {
   color: var(--signal);
-  font-size: 0.59rem;
+  font-size: var(--text-micro);
   font-weight: 500;
   line-height: 1.5;
 }
@@ -526,7 +547,7 @@ h1 {
 .section-heading > p {
   margin: 0;
   color: var(--muted);
-  font-size: 0.68rem;
+  font-size: var(--text-small);
   letter-spacing: 0.07em;
 }
 
@@ -539,7 +560,7 @@ h1 {
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  font-size: 0.62rem;
+  font-size: var(--text-small);
 }
 
 .gallery-state--error {
@@ -615,7 +636,7 @@ h1 {
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  font-size: 0.52rem;
+  font-size: var(--text-micro);
 }
 
 .art-card__label small {
@@ -626,7 +647,8 @@ h1 {
 .art-card__label strong {
   overflow: hidden;
   color: #99998f;
-  font-size: 0.57rem;
+  font-family: var(--font-display);
+  font-size: var(--text-small);
   font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -708,6 +730,7 @@ h1 {
   max-width: 690px;
   margin: 3rem 0 1rem;
   color: #9b9b90;
+  font-size: var(--text-body);
   line-height: 1.9;
 }
 
@@ -715,7 +738,7 @@ h1 {
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  font-size: 0.6rem;
+  font-size: var(--text-micro);
 }
 
 .archive-footer {
@@ -723,7 +746,7 @@ h1 {
   border-top: 1px solid var(--line);
   border-bottom: 0;
   color: #5e6059;
-  font-size: 0.52rem;
+  font-size: var(--text-micro);
   letter-spacing: 0.13em;
 }
 
@@ -812,7 +835,7 @@ h1 {
   }
 
   .archive-nav a {
-    font-size: 0.57rem;
+    font-size: var(--text-small);
   }
 
   .screen--home {
@@ -844,6 +867,7 @@ h1 {
   .inspector__window {
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
     border: 0;
   }
 
