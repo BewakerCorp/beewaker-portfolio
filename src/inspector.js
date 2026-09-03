@@ -6,7 +6,7 @@ export function fitCardDimensions(imageWidth, imageHeight, maxSpan = 4) {
   return {
     width: Number(width.toFixed(4)),
     height: Number(height.toFixed(4)),
-    depth: Number((maxSpan * 0.02).toFixed(4)),
+    depth: Number((maxSpan * 0.008).toFixed(4)),
   };
 }
 
@@ -16,6 +16,34 @@ export function fitInspectorSpan(cardWidth, cardHeight, viewportWidth, viewportH
   const heightForCardWidth = (cardWidth * margin) / safeAspect;
 
   return Number(Math.max(heightForCardHeight, heightForCardWidth).toFixed(4));
+}
+
+export function createCardMaterials(THREE, frontTexture, backTexture) {
+  const edgeMaterial = new THREE.MeshStandardMaterial({
+    color: 0x363530,
+    metalness: 0.04,
+    roughness: 0.82,
+  });
+  const frontMaterial = new THREE.MeshStandardMaterial({
+    map: frontTexture,
+    metalness: 0,
+    roughness: 0.94,
+  });
+  const backMaterial = new THREE.MeshStandardMaterial({
+    map: backTexture,
+    metalness: 0,
+    roughness: 0.94,
+  });
+
+  return [edgeMaterial, edgeMaterial, edgeMaterial, edgeMaterial, frontMaterial, backMaterial];
+}
+
+export function createInspectorLights(THREE) {
+  const ambient = new THREE.AmbientLight(0xffffff, 0.48);
+  const key = new THREE.PointLight(0xfff3df, 32, 0, 2);
+  key.position.set(-2.8, 3.4, 6.5);
+
+  return [ambient, key];
 }
 
 function resolveAsset(baseUrl, relativePath) {
@@ -178,6 +206,7 @@ export function createInspector(dialog, baseUrl = '/') {
       const scene = new THREE.Scene();
       const camera = new THREE.OrthographicCamera(-3, 3, 3, -3, 0.1, 100);
       camera.position.z = 10;
+      scene.add(...createInspectorLights(THREE));
 
       const textureLoader = new THREE.TextureLoader();
       const frontTexture = await textureLoader.loadAsync(resolveAsset(baseUrl, item.src));
@@ -213,10 +242,7 @@ export function createInspector(dialog, baseUrl = '/') {
       }
 
       const geometry = new THREE.BoxGeometry(dimensions.width, dimensions.height, dimensions.depth, 1, 1, 1);
-      const edgeMaterial = new THREE.MeshBasicMaterial({ color: 0x44433d });
-      const frontMaterial = new THREE.MeshBasicMaterial({ map: frontTexture });
-      const backMaterial = new THREE.MeshBasicMaterial({ map: backTexture });
-      const materials = [edgeMaterial, edgeMaterial, edgeMaterial, edgeMaterial, frontMaterial, backMaterial];
+      const materials = createCardMaterials(THREE, frontTexture, backTexture);
       const card = new THREE.Mesh(geometry, materials);
       card.rotation.set(0.04, -0.08, 0);
       scene.add(card);
