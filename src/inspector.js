@@ -26,11 +26,17 @@ export function createCardMaterials(THREE, frontTexture, backTexture) {
   });
   const frontMaterial = new THREE.MeshStandardMaterial({
     map: frontTexture,
+    emissive: 0xffffff,
+    emissiveMap: frontTexture,
+    emissiveIntensity: 0.35,
     metalness: 0,
     roughness: 0.94,
   });
   const backMaterial = new THREE.MeshStandardMaterial({
     map: backTexture,
+    emissive: 0xffffff,
+    emissiveMap: backTexture,
+    emissiveIntensity: 0.35,
     metalness: 0,
     roughness: 0.94,
   });
