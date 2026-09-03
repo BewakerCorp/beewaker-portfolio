@@ -1,5 +1,6 @@
 import './styles.css';
 
+import { createCustomCursor } from './cursor.js';
 import { loadGalleryManifest, renderGallery } from './gallery.js';
 import { createInspector } from './inspector.js';
 import { getSectionFromHash, navigateTo, renderSection } from './navigation.js';
@@ -22,6 +23,7 @@ window.addEventListener('hashchange', syncSection);
 syncSection();
 
 const galleryElement = document.querySelector('#gallery');
+const customCursor = createCustomCursor();
 const inspector = createInspector(document.querySelector('#art-inspector'), import.meta.env.BASE_URL);
 const socialWeb = createSocialWeb(document.querySelector('[data-social-web]'));
 
@@ -34,6 +36,7 @@ window.addEventListener(
   () => {
     inspector.destroy();
     socialWeb.destroy();
+    customCursor.destroy();
   },
   { once: true },
 );

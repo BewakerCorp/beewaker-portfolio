@@ -63,6 +63,68 @@ body::before {
   mix-blend-mode: soft-light;
 }
 
+.custom-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 120ms ease;
+  will-change: transform;
+}
+
+.custom-cursor::before,
+.custom-cursor::after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  content: '';
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.custom-cursor::before {
+  width: 4px;
+  height: 4px;
+  background: var(--paper);
+  box-shadow: 0 0 7px rgba(211, 208, 189, 0.75);
+}
+
+.custom-cursor::after {
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--blood-bright);
+  box-shadow: 0 0 12px rgba(179, 58, 61, 0.18);
+  transition: width 150ms ease, height 150ms ease, border-color 150ms ease, background 150ms ease;
+}
+
+.custom-cursor.is-visible {
+  opacity: 1;
+}
+
+.custom-cursor.is-interactive::after {
+  width: 36px;
+  height: 36px;
+  border-color: var(--paper);
+}
+
+.custom-cursor.is-pressed::after {
+  width: 15px;
+  height: 15px;
+  border-color: var(--blood-bright);
+  background: rgba(126, 32, 37, 0.24);
+}
+
+@media (pointer: fine) {
+  html.has-custom-cursor,
+  html.has-custom-cursor * {
+    cursor: none !important;
+  }
+}
+
 a,
 button {
   color: inherit;
@@ -329,43 +391,6 @@ button:focus-visible {
   box-shadow: 0 0 16px rgba(179, 58, 61, 0.7);
 }
 
-.archive-nav {
-  display: flex;
-  gap: clamp(1rem, 3vw, 2.6rem);
-}
-
-.archive-nav a {
-  position: relative;
-  color: var(--muted);
-  text-decoration: none;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  font-family: var(--font-display);
-  font-size: var(--text-small);
-}
-
-.archive-nav a::after {
-  position: absolute;
-  right: 0;
-  bottom: -0.75rem;
-  left: 0;
-  height: 1px;
-  content: '';
-  background: var(--blood-bright);
-  transform: scaleX(0);
-  transition: transform 180ms ease;
-}
-
-.archive-nav a:hover,
-.archive-nav a.is-current {
-  color: var(--paper);
-}
-
-.archive-nav a:hover::after,
-.archive-nav a.is-current::after {
-  transform: scaleX(1);
-}
-
 main {
   min-height: 0;
 }
@@ -413,12 +438,6 @@ main {
   text-transform: uppercase;
   letter-spacing: 0.18em;
   font-size: var(--text-micro);
-}
-
-.eyebrow span + span::before {
-  padding-right: 1.5rem;
-  color: var(--line-strong);
-  content: '/';
 }
 
 h1 {
@@ -911,10 +930,6 @@ h1 {
     min-height: 64px;
   }
 
-  .archive-nav {
-    gap: 1rem;
-  }
-
   .screen--home {
     grid-template-columns: 1fr;
     align-content: center;
@@ -944,13 +959,8 @@ h1 {
 }
 
 @media (max-width: 560px) {
-  .archive-mark small,
-  .archive-footer span + span {
+  .archive-mark small {
     display: none;
-  }
-
-  .archive-nav a {
-    font-size: var(--text-small);
   }
 
   .screen--home {
@@ -993,10 +1003,6 @@ h1 {
   .archive-button + .archive-button {
     border-top: 1px solid var(--line);
     border-left: 0;
-  }
-
-  .eyebrow span + span {
-    display: none;
   }
 
   .gallery-grid {

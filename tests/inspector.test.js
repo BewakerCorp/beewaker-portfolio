@@ -37,6 +37,12 @@ describe('card lighting', () => {
     expect(materials.every((material) => material.isMeshStandardMaterial)).toBe(true);
     expect(materials[4].map).toBe(frontTexture);
     expect(materials[5].map).toBe(backTexture);
+    expect(materials[4].emissiveMap).toBe(frontTexture);
+    expect(materials[5].emissiveMap).toBe(backTexture);
+    expect(materials[4].emissive.getHex()).toBe(0xffffff);
+    expect(materials[5].emissive.getHex()).toBe(0xffffff);
+    expect(materials[4].emissiveIntensity).toBeGreaterThan(0);
+    expect(materials[5].emissiveIntensity).toBeGreaterThan(0);
 
     [...new Set(materials)].forEach((material) => material.dispose());
     frontTexture.dispose();
