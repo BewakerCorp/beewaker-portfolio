@@ -4,14 +4,19 @@ export function createCustomCursor(root = document, view = window) {
   const hasFinePointer = view.matchMedia('(pointer: fine)').matches;
   const prefersReducedMotion = view.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!hasFinePointer || prefersReducedMotion || !root.body) {
-    return { destroy() {} };
+    return { mount() {}, destroy() {} };
   }
 
   const cursor = root.createElement('div');
   cursor.className = 'custom-cursor';
   cursor.setAttribute('aria-hidden', 'true');
-  root.body.append(cursor);
   root.documentElement.classList.add('has-custom-cursor');
+
+  function mount(container = root.body) {
+    (container || root.body).append(cursor);
+  }
+
+  mount();
 
   function onPointerMove(event) {
     cursor.style.transform = `translate3d(${event.clientX}px, ${event.clientY}px, 0)`;
@@ -43,6 +48,7 @@ export function createCustomCursor(root = document, view = window) {
   view.addEventListener('blur', hideCursor);
 
   return {
+    mount,
     destroy() {
       root.removeEventListener('pointermove', onPointerMove);
       root.removeEventListener('pointerover', onPointerOver);

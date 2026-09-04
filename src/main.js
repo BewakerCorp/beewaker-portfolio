@@ -23,11 +23,19 @@ window.addEventListener('hashchange', syncSection);
 syncSection();
 
 const galleryElement = document.querySelector('#gallery');
+const inspectorDialog = document.querySelector('#art-inspector');
 const customCursor = createCustomCursor();
-const inspector = createInspector(document.querySelector('#art-inspector'), import.meta.env.BASE_URL);
+const inspector = createInspector(inspectorDialog, import.meta.env.BASE_URL);
 const socialWeb = createSocialWeb(document.querySelector('[data-social-web]'));
 
+function restoreCursorLayer() {
+  customCursor.mount();
+}
+
+inspectorDialog.addEventListener('close', restoreCursorLayer);
+
 document.addEventListener('artwork:select', (event) => {
+  customCursor.mount(inspectorDialog);
   inspector.open(event.detail.item, event.detail.trigger);
 });
 
@@ -36,6 +44,7 @@ window.addEventListener(
   () => {
     inspector.destroy();
     socialWeb.destroy();
+    inspectorDialog.removeEventListener('close', restoreCursorLayer);
     customCursor.destroy();
   },
   { once: true },
