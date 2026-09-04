@@ -18,6 +18,11 @@ export function fitInspectorSpan(cardWidth, cardHeight, viewportWidth, viewportH
   return Number(Math.max(heightForCardHeight, heightForCardWidth).toFixed(4));
 }
 
+export function getFaceEmissiveIntensity(faceAlignment, maximum = 0.35) {
+  const alignment = Number.isFinite(faceAlignment) ? Math.min(1, Math.abs(faceAlignment)) : 1;
+  return Number((maximum * alignment ** 8).toFixed(4));
+}
+
 export function createCardMaterials(THREE, frontTexture, backTexture) {
   const edgeMaterial = new THREE.MeshStandardMaterial({
     color: 0x363530,
@@ -256,6 +261,9 @@ export function createInspector(dialog, baseUrl = '/') {
       const axisX = new THREE.Vector3(1, 0, 0);
       const axisY = new THREE.Vector3(0, 1, 0);
       const axisZ = new THREE.Vector3(0, 0, 1);
+      const localFaceNormal = new THREE.Vector3(0, 0, 1);
+      const worldFaceNormal = new THREE.Vector3();
+      const viewDirection = new THREE.Vector3();
       let dragging = false;
       let pointerId = null;
       let previousX = 0;
@@ -339,6 +347,11 @@ export function createInspector(dialog, baseUrl = '/') {
           if (Math.abs(velocityX) > 0.0001) card.rotateOnWorldAxis(axisX, velocityX);
           if (Math.abs(velocityZ) > 0.0001) card.rotateOnWorldAxis(axisZ, velocityZ);
         }
+        worldFaceNormal.copy(localFaceNormal).applyQuaternion(card.quaternion).normalize();
+        viewDirection.copy(camera.position).sub(card.position).normalize();
+        const emissiveIntensity = getFaceEmissiveIntensity(worldFaceNormal.dot(viewDirection));
+        materials[4].emissiveIntensity = emissiveIntensity;
+        materials[5].emissiveIntensity = emissiveIntensity;
         renderer.render(scene, camera);
         frameId = requestAnimationFrame(animate);
       }
