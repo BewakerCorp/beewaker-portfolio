@@ -23,6 +23,24 @@ export function getFaceEmissiveIntensity(faceAlignment, maximum = 0.35) {
   return Number((maximum * alignment ** 8).toFixed(4));
 }
 
+export function filterRotationDelta(deltaX, deltaY) {
+  let x = deltaX;
+  let y = deltaY;
+  const absoluteX = Math.abs(x);
+  const absoluteY = Math.abs(y);
+
+  if (absoluteX > absoluteY && absoluteY / absoluteX < 0.35) {
+    y = absoluteY <= 1.25 ? 0 : y * 0.15;
+  } else if (absoluteY > absoluteX && absoluteX / absoluteY < 0.35) {
+    x = absoluteX <= 1.25 ? 0 : x * 0.15;
+  }
+
+  return {
+    x: Number(x.toFixed(4)),
+    y: Number(y.toFixed(4)),
+  };
+}
+
 export function createCardMaterials(THREE, frontTexture, backTexture) {
   const edgeMaterial = new THREE.MeshStandardMaterial({
     color: 0x363530,
@@ -49,12 +67,14 @@ export function createCardMaterials(THREE, frontTexture, backTexture) {
   return [edgeMaterial, edgeMaterial, edgeMaterial, edgeMaterial, frontMaterial, backMaterial];
 }
 
-export function createInspectorLights(THREE) {
+export function createInspectorLights(THREE, cardWidth = 4) {
   const ambient = new THREE.AmbientLight(0xffffff, 0.48);
   const key = new THREE.PointLight(0xfff3df, 32, 0, 2);
   key.position.set(-2.8, 3.4, 6.5);
+  const accent = new THREE.PointLight(0xffe6c7, 8, 12, 2);
+  accent.position.set(-cardWidth, 0, 4.5);
 
-  return [ambient, key];
+  return [ambient, key, accent];
 }
 
 function resolveAsset(baseUrl, relativePath) {
@@ -217,7 +237,6 @@ export function createInspector(dialog, baseUrl = '/') {
       const scene = new THREE.Scene();
       const camera = new THREE.OrthographicCamera(-3, 3, 3, -3, 0.1, 100);
       camera.position.z = 10;
-      scene.add(...createInspectorLights(THREE));
 
       const textureLoader = new THREE.TextureLoader();
       const frontTexture = await textureLoader.loadAsync(resolveAsset(baseUrl, item.src));
@@ -233,6 +252,7 @@ export function createInspector(dialog, baseUrl = '/') {
       const imageHeight = frontTexture.image?.naturalHeight || frontTexture.image?.height || 0;
       const ratio = imageWidth > 0 && imageHeight > 0 ? imageWidth / imageHeight : 0.75;
       const dimensions = fitCardDimensions(imageWidth, imageHeight, 4);
+      scene.add(...createInspectorLights(THREE, dimensions.width));
 
       let backTexture;
       if (item.backImage) {
@@ -301,17 +321,18 @@ export function createInspector(dialog, baseUrl = '/') {
 
       function onPointerMove(event) {
         if (!dragging || event.pointerId !== pointerId) return;
-        const deltaX = event.clientX - previousX;
-        const deltaY = event.clientY - previousY;
+        const rawDeltaX = event.clientX - previousX;
+        const rawDeltaY = event.clientY - previousY;
         previousX = event.clientX;
         previousY = event.clientY;
+        const { x: deltaX, y: deltaY } = filterRotationDelta(rawDeltaX, rawDeltaY);
 
         if (event.shiftKey) {
-          velocityZ = deltaX * 0.008;
+          velocityZ = deltaX * 0.006;
           card.rotateOnWorldAxis(axisZ, velocityZ);
         } else {
-          velocityY = deltaX * 0.008;
-          velocityX = deltaY * 0.008;
+          velocityY = deltaX * 0.006;
+          velocityX = deltaY * 0.006;
           card.rotateOnWorldAxis(axisY, velocityY);
           card.rotateOnWorldAxis(axisX, velocityX);
         }
