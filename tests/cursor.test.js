@@ -62,6 +62,7 @@ function makeEnvironment({ finePointer = true, reducedMotion = false } = {}) {
     children: [],
     append(element) {
       this.children.push(element);
+      element.parentContainer = this;
     },
   };
   root.createElement = () => cursor;
@@ -104,6 +105,25 @@ describe('custom cursor', () => {
 
     expect(root.documentElement.classList.contains('has-custom-cursor')).toBe(false);
     expect(cursor.removed).toBe(true);
+  });
+
+  test('moves into the inspector layer and returns to the page', () => {
+    const { root, view, cursor } = makeEnvironment();
+    const inspectorLayer = {
+      children: [],
+      append(element) {
+        this.children.push(element);
+        element.parentContainer = this;
+      },
+    };
+    const controller = createCustomCursor(root, view);
+
+    expect(controller.mount).toBeTypeOf('function');
+    controller.mount?.(inspectorLayer);
+    expect(cursor.parentContainer).toBe(inspectorLayer);
+
+    controller.mount?.();
+    expect(cursor.parentContainer).toBe(root.body);
   });
 
   test('keeps the native cursor for coarse pointers and reduced motion', () => {
