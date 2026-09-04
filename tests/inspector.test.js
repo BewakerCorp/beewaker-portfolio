@@ -1,12 +1,13 @@
 import { describe, expect, test } from 'vitest';
 import * as THREE from 'three';
+import * as inspector from '../src/inspector.js';
 
-import {
+const {
   createCardMaterials,
   createInspectorLights,
   fitCardDimensions,
   fitInspectorSpan,
-} from '../src/inspector.js';
+} = inspector;
 
 describe('fitCardDimensions', () => {
   test('fits portrait artwork to the maximum span', () => {
@@ -27,6 +28,13 @@ describe('fitCardDimensions', () => {
 });
 
 describe('card lighting', () => {
+  test('keeps a face-on artwork bright and quickly restores shading as it tilts', () => {
+    expect(inspector.getFaceEmissiveIntensity?.(1)).toBe(0.35);
+    expect(inspector.getFaceEmissiveIntensity?.(0.7)).toBeLessThan(0.05);
+    expect(inspector.getFaceEmissiveIntensity?.(0)).toBe(0);
+    expect(inspector.getFaceEmissiveIntensity?.(-1)).toBe(0.35);
+  });
+
   test('uses light-reactive materials for the artwork faces and edges', () => {
     const frontTexture = new THREE.Texture();
     const backTexture = new THREE.Texture();
