@@ -57,15 +57,36 @@ describe('card lighting', () => {
     backTexture.dispose();
   });
 
-  test('places a soft key light in front of the rotatable card', () => {
-    const lights = createInspectorLights(THREE);
+  test('places a soft key light and a weaker left accent in front of the card', () => {
+    const lights = createInspectorLights(THREE, 3);
     const ambient = lights.find((light) => light.isAmbientLight);
-    const key = lights.find((light) => light.isPointLight);
+    const pointLights = lights.filter((light) => light.isPointLight);
+    const accent = pointLights.find((light) => light.position.y === 0);
+    const key = pointLights.find((light) => light !== accent);
 
     expect(ambient).toBeDefined();
+    expect(pointLights).toHaveLength(2);
     expect(key).toBeDefined();
     expect(key.position.z).toBeGreaterThan(0);
     expect(key.decay).toBeGreaterThan(0);
+    expect(accent?.position.toArray()).toEqual([-3, 0, 4.5]);
+    expect(accent?.intensity).toBeLessThan(key.intensity);
+  });
+});
+
+describe('rotation input', () => {
+  test('removes tiny cross-axis jitter from a deliberate horizontal drag', () => {
+    expect(inspector.filterRotationDelta?.(10, 1)).toEqual({ x: 10, y: 0 });
+  });
+
+  test('softens noticeable cross-axis drift in either dominant direction', () => {
+    expect(inspector.filterRotationDelta?.(10, 2)).toEqual({ x: 10, y: 0.3 });
+    expect(inspector.filterRotationDelta?.(2, 10)).toEqual({ x: 0.3, y: 10 });
+  });
+
+  test('keeps intentional diagonal and slow movement intact', () => {
+    expect(inspector.filterRotationDelta?.(10, 5)).toEqual({ x: 10, y: 5 });
+    expect(inspector.filterRotationDelta?.(1, 1)).toEqual({ x: 1, y: 1 });
   });
 });
 
