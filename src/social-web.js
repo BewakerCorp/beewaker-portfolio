@@ -18,6 +18,14 @@ export const SOCIAL_LINKS = Object.freeze([
     spoke: 1,
   },
   {
+    id: 'discord',
+    mark: 'Ds',
+    label: 'Discord - beewaker',
+    href: 'https://discord.com/users/338684455348600832',
+    ring: 4,
+    spoke: 2,
+  },
+  {
     id: 'tiktok-main',
     mark: 'Tk',
     label: 'TikTok - old main',
@@ -36,8 +44,9 @@ export const SOCIAL_LINKS = Object.freeze([
   {
     id: 'commissions',
     mark: 'Cm',
-    label: 'Commissions.gg',
+    label: 'Commissions.gg - unavailable for payments',
     href: 'https://www.commissions.gg/beewaker',
+    unavailable: true,
     ring: 3,
     spoke: 5,
   },
@@ -140,7 +149,7 @@ function createSvgElement(name, className) {
 
 function createSocialLink(social) {
   const link = document.createElement('a');
-  link.className = 'social-node';
+  link.className = social.unavailable ? 'social-node social-node--unavailable' : 'social-node';
   link.href = social.href;
   link.target = '_blank';
   link.rel = 'noreferrer noopener';

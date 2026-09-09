@@ -41,9 +41,21 @@ describe('stepWebNodes', () => {
 });
 
 describe('SOCIAL_LINKS', () => {
-  test('contains five distinct destinations with short marks', () => {
-    expect(SOCIAL_LINKS).toHaveLength(5);
-    expect(new Set(SOCIAL_LINKS.map((social) => social.href)).size).toBe(5);
-    expect(SOCIAL_LINKS.map((social) => social.mark)).toEqual(['Af', 'Tg', 'Tk', 'Tk', 'Cm']);
+  test('includes the public Discord profile as a distinct destination', () => {
+    const discord = SOCIAL_LINKS.find((social) => social.id === 'discord');
+
+    expect(discord).toMatchObject({
+      mark: 'Ds',
+      label: 'Discord - beewaker',
+      href: 'https://discord.com/users/338684455348600832',
+    });
+    expect(new Set(SOCIAL_LINKS.map((social) => social.href)).size).toBe(SOCIAL_LINKS.length);
+  });
+
+  test('marks the old Commissions.gg destination as unavailable without removing its link', () => {
+    expect(SOCIAL_LINKS.find((social) => social.id === 'commissions')).toMatchObject({
+      href: 'https://www.commissions.gg/beewaker',
+      unavailable: true,
+    });
   });
 });

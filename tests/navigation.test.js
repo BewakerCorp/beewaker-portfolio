@@ -8,6 +8,7 @@ describe('getSectionFromHash', () => {
     ['#', 'home'],
     ['#home', 'home'],
     ['#portfolio', 'portfolio'],
+    ['#commissions', 'commissions'],
     ['#socials', 'socials'],
   ])('maps %s to %s', (hash, section) => {
     expect(getSectionFromHash(hash)).toBe(section);

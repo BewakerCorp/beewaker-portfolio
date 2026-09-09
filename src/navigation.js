@@ -1,4 +1,4 @@
-const SECTIONS = new Set(['home', 'portfolio', 'socials']);
+const SECTIONS = new Set(['home', 'portfolio', 'commissions', 'socials']);
 
 export function getSectionFromHash(hash = '') {
   const normalized = String(hash).trim().replace(/^#/, '').toLowerCase() || 'home';

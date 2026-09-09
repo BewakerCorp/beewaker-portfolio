@@ -38,8 +38,13 @@
                 <strong>Open portfolio</strong>
                 <i aria-hidden="true">↗</i>
               </a>
-              <a class="archive-button" href="#socials" data-nav-target="socials">
+              <a class="archive-button" href="#commissions" data-nav-target="commissions">
                 <span>02</span>
+                <strong>Commissions</strong>
+                <i aria-hidden="true">↗</i>
+              </a>
+              <a class="archive-button" href="#socials" data-nav-target="socials">
+                <span>03</span>
                 <strong>Social networks</strong>
                 <i aria-hidden="true">↗</i>
               </a>
@@ -66,6 +71,116 @@
           <div id="gallery" class="gallery-state" aria-live="polite">
             <span class="loader-mark" aria-hidden="true"></span>
             <p>The archive is being indexed.</p>
+          </div>
+        </section>
+
+        <section
+          class="screen screen--commissions"
+          data-section="commissions"
+          aria-labelledby="commissions-title"
+          hidden
+        >
+          <header class="commissions-heading">
+            <div>
+              <p class="eyebrow">Custom character artwork / prices in USD</p>
+              <h1 id="commissions-title">Commissions</h1>
+            </div>
+            <p>Contact me before sending any payment.</p>
+          </header>
+
+          <div class="commissions-layout">
+            <aside class="commissions-copy" aria-label="Commission information and terms">
+              <section class="commission-scope" aria-labelledby="commission-scope-title">
+                <h2 id="commission-scope-title">Subjects</h2>
+                <div class="commission-scope__columns">
+                  <div>
+                    <h3>Can do</h3>
+                    <ul>
+                      <li>Original characters</li>
+                      <li>Fan art</li>
+                      <li>Simple decorative backgrounds</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h3>Can't do</h3>
+                    <ul>
+                      <li>NSFW</li>
+                      <li>Mecha or complex machinery</li>
+                      <li>Furry characters</li>
+                      <li>Complex backgrounds</li>
+                    </ul>
+                  </div>
+                </div>
+              </section>
+
+              <section class="commission-rules" aria-labelledby="commission-rules-title">
+                <h2 id="commission-rules-title">Order &amp; delivery</h2>
+                <ol>
+                  <li>
+                    Contact me on Discord and include the word <strong>MOTH</strong> in your first message.
+                  </li>
+                  <li>Please do not send payment before I accept your request.</li>
+                  <li>Payment through Boosty is requested only after the sketch is ready.</li>
+                  <li>
+                    The usual turnaround is up to two weeks after payment. The exact deadline is discussed
+                    individually.
+                  </li>
+                  <li>The finished artwork will be delivered through the same Discord conversation.</li>
+                  <li>I may decline any request that I am not comfortable with.</li>
+                </ol>
+
+                <div class="commission-usage">
+                  <h3>Usage</h3>
+                  <p>
+                    Personal use is allowed, including use as an avatar. When reposting the artwork publicly,
+                    please credit Beewaker and do not remove the artist's signature.
+                  </p>
+                  <p>Resale and any other commercial use are prohibited unless agreed in advance.</p>
+                </div>
+              </section>
+            </aside>
+
+            <figure class="commission-prices">
+              <img
+                src="%BASE_URL%commission-prices.webp"
+                alt="Commission prices in US dollars. Waist-up: lineart 10, flat color 18, render 25. Knee-up: lineart 13, flat color 25, render 40. Full body: lineart 17, flat color 35, render 55."
+                draggable="false"
+              />
+              <figcaption>Lineart / flat color / render · all prices are in USD</figcaption>
+            </figure>
+
+            <div class="commission-checkout">
+              <div class="commission-turnaround">
+                <span>Typical turnaround</span>
+                <strong>Up to 2 weeks</strong>
+                <small>Exact timing is agreed individually.</small>
+              </div>
+
+              <div class="commission-links" aria-label="Commission contact and payment links">
+                <a
+                  class="commission-link commission-link--contact"
+                  href="https://discord.com/users/338684455348600832"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  <span>Contact</span>
+                  <strong>Discord · beewaker</strong>
+                  <i aria-hidden="true">↗</i>
+                </a>
+                <a
+                  class="commission-link commission-link--payment"
+                  href="https://boosty.to/bwkincorp"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  <span>After the sketch is ready</span>
+                  <strong>Payment via Boosty</strong>
+                  <i aria-hidden="true">↗</i>
+                </a>
+              </div>
+
+              <p class="commission-warning">Do not pay before your request is accepted and the sketch is ready.</p>
+            </div>
           </div>
         </section>
 
