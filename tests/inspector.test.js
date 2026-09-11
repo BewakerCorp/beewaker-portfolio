@@ -3,11 +3,54 @@ import * as THREE from 'three';
 import * as inspector from '../src/inspector.js';
 
 const {
+  createArtworkCreditLink,
   createCardMaterials,
   createInspectorLights,
   fitCardDimensions,
   fitInspectorSpan,
 } = inspector;
+
+describe('linked artwork credit', () => {
+  test('creates an external link that stays hidden until the card back faces the viewer', () => {
+    const createdElements = [];
+    const documentRoot = {
+      createElement(tagName) {
+        const element = { tagName, dataset: {} };
+        createdElements.push(element);
+        return element;
+      },
+    };
+
+    const link = createArtworkCreditLink?.(
+      {
+        credit: {
+          label: 'Character by manipulatinglileye',
+          url: 'https://artfight.net/~manipulatinglileye',
+        },
+      },
+      documentRoot,
+    );
+
+    expect(createdElements).toHaveLength(1);
+    expect(link).toMatchObject({
+      tagName: 'a',
+      className: 'inspector__credit',
+      href: 'https://artfight.net/~manipulatinglileye',
+      target: '_blank',
+      rel: 'noreferrer noopener',
+      textContent: 'Character by manipulatinglileye \u2197',
+      hidden: true,
+    });
+  });
+
+  test('shows a linked credit only when the back is nearly face-on', () => {
+    expect(inspector.isBackFaceVisible?.(-1)).toBe(true);
+    expect(inspector.isBackFaceVisible?.(-0.84)).toBe(true);
+    expect(inspector.isBackFaceVisible?.(-0.5)).toBe(false);
+    expect(inspector.isBackFaceVisible?.(1)).toBe(false);
+    expect(inspector.isBackFaceVisible?.(Number.NaN)).toBe(false);
+  });
+});
 
 describe('fitCardDimensions', () => {
   test('fits portrait artwork to the maximum span', () => {

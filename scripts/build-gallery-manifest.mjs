@@ -38,6 +38,23 @@ async function readMetadata(metadataPath) {
   }
 }
 
+function normalizeCredit(credit) {
+  if (!credit || typeof credit !== 'object') return null;
+
+  const label = typeof credit.label === 'string' ? credit.label.trim() : '';
+  const url = typeof credit.url === 'string' ? credit.url.trim() : '';
+  if (!label || !url) return null;
+
+  try {
+    const parsedUrl = new URL(url);
+    if (!['http:', 'https:'].includes(parsedUrl.protocol)) return null;
+  } catch {
+    return null;
+  }
+
+  return { label, url };
+}
+
 async function findBackImage({ stem, metadata, biblioDir, biblioFiles }) {
   const requested = typeof metadata.backImage === 'string' ? path.basename(metadata.backImage) : null;
   const candidates = requested
@@ -87,6 +104,7 @@ export async function buildGalleryManifest({ galleryDir, biblioDir }) {
           ? metadata.characters.filter((name) => typeof name === 'string' && name.trim()).map((name) => name.trim())
           : [],
         backImage,
+        credit: normalizeCredit(metadata.credit),
       };
     }),
   );

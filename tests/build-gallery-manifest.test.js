@@ -41,8 +41,48 @@ describe('buildGalleryManifest', () => {
         year: null,
         characters: [],
         backImage: null,
+        credit: null,
       },
     ]);
+  });
+
+  test('includes a linked character credit from artwork metadata', async () => {
+    const { galleryDir, biblioDir } = await makeContentTree();
+    await writeFile(path.join(galleryDir, 'art-fight-attack.webp'), 'image');
+    await writeFile(
+      path.join(biblioDir, 'art-fight-attack.json'),
+      JSON.stringify({
+        credit: {
+          label: 'Character by manipulatinglileye',
+          url: 'https://artfight.net/~manipulatinglileye',
+        },
+      }),
+    );
+
+    const [item] = await buildGalleryManifest({ galleryDir, biblioDir });
+
+    expect(item.credit).toEqual({
+      label: 'Character by manipulatinglileye',
+      url: 'https://artfight.net/~manipulatinglileye',
+    });
+  });
+
+  test('rejects a character credit with an unsafe link protocol', async () => {
+    const { galleryDir, biblioDir } = await makeContentTree();
+    await writeFile(path.join(galleryDir, 'unsafe-credit.webp'), 'image');
+    await writeFile(
+      path.join(biblioDir, 'unsafe-credit.json'),
+      JSON.stringify({
+        credit: {
+          label: 'Unsafe credit',
+          url: 'javascript:alert(1)',
+        },
+      }),
+    );
+
+    const [item] = await buildGalleryManifest({ galleryDir, biblioDir });
+
+    expect(item.credit).toBeNull();
   });
 
   test('merges matching metadata and an explicit custom back image', async () => {

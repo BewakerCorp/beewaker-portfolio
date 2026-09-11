@@ -313,6 +313,38 @@ button:focus-visible {
   cursor: grabbing;
 }
 
+.inspector__credit {
+  position: absolute;
+  top: 64%;
+  left: 50%;
+  z-index: 4;
+  max-width: min(70%, 34rem);
+  padding: 0.7rem 0.9rem;
+  color: #eeeade;
+  border: 1px solid rgba(126, 32, 37, 0.88);
+  background: rgba(22, 19, 18, 0.9);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.38);
+  font-size: var(--text-small);
+  line-height: 1.35;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transform: translate(-50%, -50%);
+}
+
+.inspector__credit:hover,
+.inspector__credit:focus-visible {
+  color: #fff;
+  border-color: var(--blood-bright);
+  background: rgba(126, 32, 37, 0.45);
+  outline: none;
+}
+
+.inspector__credit[hidden] {
+  display: none;
+}
+
 .inspector__status {
   position: absolute;
   top: 50%;

@@ -15,11 +15,15 @@ A lightweight artwork portfolio with a masonry gallery and a two-sided 3D inspec
      "title": "Forest God",
      "year": 2026,
      "characters": ["Character name"],
-     "description": "Text shown on the reverse side."
+     "description": "Text shown on the reverse side.",
+     "credit": {
+       "label": "Character by artistname",
+       "url": "https://artfight.net/~artistname"
+     }
    }
    ```
 
-4. Optionally put a custom reverse image in `public/biblio/forest-god-back.webp`. It is detected automatically. You can also name another supported image in the JSON with `"backImage": "filename.webp"`.
+4. Optionally put a custom reverse image in `public/biblio/forest-god-back.webp`. It is detected automatically. You can also name another supported image in the JSON with `"backImage": "filename.webp"`. Linked credits accept only `http://` and `https://` URLs and appear when the reverse side faces the viewer.
 5. Commit the files to `main`. GitHub Actions regenerates the gallery manifest and republishes the site.
 
 If the JSON is absent or invalid, the artwork still appears with a title derived from its filename and the standard information back.

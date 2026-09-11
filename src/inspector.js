@@ -23,6 +23,23 @@ export function getFaceEmissiveIntensity(faceAlignment, maximum = 0.35) {
   return Number((maximum * alignment ** 8).toFixed(4));
 }
 
+export function isBackFaceVisible(faceAlignment, threshold = 0.82) {
+  return Number.isFinite(faceAlignment) && faceAlignment <= -Math.abs(threshold);
+}
+
+export function createArtworkCreditLink(item, documentRoot = document) {
+  if (!item.credit?.label || !item.credit?.url) return null;
+
+  const link = documentRoot.createElement('a');
+  link.className = 'inspector__credit';
+  link.href = item.credit.url;
+  link.target = '_blank';
+  link.rel = 'noreferrer noopener';
+  link.textContent = `${item.credit.label} \u2197`;
+  link.hidden = true;
+  return link;
+}
+
 export function filterRotationDelta(deltaX, deltaY) {
   let x = deltaX;
   let y = deltaY;
@@ -233,6 +250,8 @@ export function createInspector(dialog, baseUrl = '/') {
       renderer.domElement.setAttribute('aria-label', `${item.title}, rotatable artwork card`);
       renderer.domElement.setAttribute('role', 'img');
       viewport.append(renderer.domElement);
+      const creditLink = createArtworkCreditLink(item);
+      if (creditLink) viewport.append(creditLink);
 
       const scene = new THREE.Scene();
       const camera = new THREE.OrthographicCamera(-3, 3, 3, -3, 0.1, 100);
@@ -370,9 +389,11 @@ export function createInspector(dialog, baseUrl = '/') {
         }
         worldFaceNormal.copy(localFaceNormal).applyQuaternion(card.quaternion).normalize();
         viewDirection.copy(camera.position).sub(card.position).normalize();
-        const emissiveIntensity = getFaceEmissiveIntensity(worldFaceNormal.dot(viewDirection));
+        const faceAlignment = worldFaceNormal.dot(viewDirection);
+        const emissiveIntensity = getFaceEmissiveIntensity(faceAlignment);
         materials[4].emissiveIntensity = emissiveIntensity;
         materials[5].emissiveIntensity = emissiveIntensity;
+        if (creditLink) creditLink.hidden = !isBackFaceVisible(faceAlignment);
         renderer.render(scene, camera);
         frameId = requestAnimationFrame(animate);
       }
@@ -407,6 +428,7 @@ export function createInspector(dialog, baseUrl = '/') {
         backTexture.dispose();
         renderer.dispose();
         renderer.domElement.remove();
+        creditLink?.remove();
       };
     } catch (error) {
       console.error(error);
