@@ -393,6 +393,24 @@ button:focus-visible {
   font: inherit;
 }
 
+.inspector__flip {
+  padding: 0.38rem 0.58rem;
+  color: #8e9088;
+  border: 1px solid var(--line);
+  background: rgba(17, 18, 15, 0.78);
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+.inspector__flip:hover,
+.inspector__flip:focus-visible {
+  color: var(--paper);
+  border-color: var(--blood-bright);
+  outline: none;
+}
+
 .archive-mark {
   display: grid;
   grid-template-columns: auto auto;

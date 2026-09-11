@@ -30,6 +30,13 @@ export function isBackFaceVisible(faceAlignment, threshold = 0.82) {
 export function createArtworkCreditLink(item, documentRoot = document) {
   if (!item.credit?.label || !item.credit?.url) return null;
 
+  try {
+    const parsedUrl = new URL(item.credit.url);
+    if (!['http:', 'https:'].includes(parsedUrl.protocol)) return null;
+  } catch {
+    return null;
+  }
+
   const link = documentRoot.createElement('a');
   link.className = 'inspector__credit';
   link.href = item.credit.url;
@@ -38,6 +45,10 @@ export function createArtworkCreditLink(item, documentRoot = document) {
   link.textContent = `${item.credit.label} \u2197`;
   link.hidden = true;
   return link;
+}
+
+export function flipArtworkCard(card, worldYAxis) {
+  card.rotateOnWorldAxis(worldYAxis, Math.PI);
 }
 
 export function filterRotationDelta(deltaX, deltaY) {
@@ -192,6 +203,7 @@ export function createInspector(dialog, baseUrl = '/') {
   const status = dialog.querySelector('[data-inspector-status]');
   const title = dialog.querySelector('[data-inspector-title]');
   const closeButton = dialog.querySelector('[data-inspector-close]');
+  const flipButton = dialog.querySelector('[data-inspector-flip]');
   let activeTrigger = null;
   let openToken = 0;
   let cleanupScene = () => {};
@@ -312,6 +324,25 @@ export function createInspector(dialog, baseUrl = '/') {
       let velocityZ = 0;
       let frameId = 0;
 
+      function updateCreditVisibility(faceAlignment, focusCredit = false) {
+        if (!creditLink) return;
+        const visible = isBackFaceVisible(faceAlignment);
+        creditLink.hidden = !visible;
+        if (visible && focusCredit) {
+          requestAnimationFrame(() => creditLink.focus({ preventScroll: true }));
+        }
+      }
+
+      function onFlip(event) {
+        velocityX = 0;
+        velocityY = 0;
+        velocityZ = 0;
+        flipArtworkCard(card, axisY);
+        worldFaceNormal.copy(localFaceNormal).applyQuaternion(card.quaternion).normalize();
+        viewDirection.copy(camera.position).sub(card.position).normalize();
+        updateCreditVisibility(worldFaceNormal.dot(viewDirection), event.detail === 0);
+      }
+
       function resize() {
         const bounds = viewport.getBoundingClientRect();
         const width = Math.max(1, bounds.width);
@@ -393,7 +424,7 @@ export function createInspector(dialog, baseUrl = '/') {
         const emissiveIntensity = getFaceEmissiveIntensity(faceAlignment);
         materials[4].emissiveIntensity = emissiveIntensity;
         materials[5].emissiveIntensity = emissiveIntensity;
-        if (creditLink) creditLink.hidden = !isBackFaceVisible(faceAlignment);
+        updateCreditVisibility(faceAlignment);
         renderer.render(scene, camera);
         frameId = requestAnimationFrame(animate);
       }
@@ -405,6 +436,7 @@ export function createInspector(dialog, baseUrl = '/') {
       renderer.domElement.addEventListener('dblclick', resetCard);
       renderer.domElement.addEventListener('wheel', onWheel, { passive: false });
       renderer.domElement.addEventListener('contextmenu', (event) => event.preventDefault());
+      flipButton.addEventListener('click', onFlip);
       window.addEventListener('resize', resize);
       const viewportObserver = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(resize);
       viewportObserver?.observe(viewport);
@@ -422,6 +454,7 @@ export function createInspector(dialog, baseUrl = '/') {
         renderer.domElement.removeEventListener('pointercancel', endPointer);
         renderer.domElement.removeEventListener('dblclick', resetCard);
         renderer.domElement.removeEventListener('wheel', onWheel);
+        flipButton.removeEventListener('click', onFlip);
         geometry.dispose();
         [...new Set(materials)].forEach((material) => material.dispose());
         frontTexture.dispose();

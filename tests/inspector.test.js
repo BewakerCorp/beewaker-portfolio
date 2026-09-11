@@ -43,12 +43,37 @@ describe('linked artwork credit', () => {
     });
   });
 
+  test('refuses an unsafe credit URL even if malformed data reaches the inspector directly', () => {
+    const documentRoot = {
+      createElement() {
+        throw new Error('Unsafe credit must not create a link');
+      },
+    };
+
+    expect(
+      createArtworkCreditLink?.(
+        { credit: { label: 'Unsafe credit', url: 'javascript:alert(1)' } },
+        documentRoot,
+      ),
+    ).toBeNull();
+  });
+
   test('shows a linked credit only when the back is nearly face-on', () => {
     expect(inspector.isBackFaceVisible?.(-1)).toBe(true);
     expect(inspector.isBackFaceVisible?.(-0.84)).toBe(true);
     expect(inspector.isBackFaceVisible?.(-0.5)).toBe(false);
     expect(inspector.isBackFaceVisible?.(1)).toBe(false);
     expect(inspector.isBackFaceVisible?.(Number.NaN)).toBe(false);
+  });
+
+  test('flips the artwork 180 degrees around the world Y axis for keyboard controls', () => {
+    const card = new THREE.Object3D();
+    const worldY = new THREE.Vector3(0, 1, 0);
+    const frontNormal = new THREE.Vector3(0, 0, 1);
+
+    inspector.flipArtworkCard?.(card, worldY);
+
+    expect(frontNormal.applyQuaternion(card.quaternion).z).toBeCloseTo(-1, 5);
   });
 });
 
