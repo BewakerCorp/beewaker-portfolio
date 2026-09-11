@@ -175,4 +175,30 @@ describe('buildGalleryManifest', () => {
       '05-closing',
     ]);
   });
+
+  test('orders invisible portfolio categories as original works, fan art, then commissions', async () => {
+    const { galleryDir, biblioDir } = await makeContentTree();
+    await Promise.all([
+      writeFile(path.join(galleryDir, '01-commission.webp'), 'image'),
+      writeFile(path.join(galleryDir, '02-fan-art.webp'), 'image'),
+      writeFile(path.join(galleryDir, '03-original.webp'), 'image'),
+      writeFile(
+        path.join(biblioDir, '01-commission.json'),
+        JSON.stringify({ category: 'commissions' }),
+      ),
+      writeFile(
+        path.join(biblioDir, '02-fan-art.json'),
+        JSON.stringify({ category: 'fanart' }),
+      ),
+      writeFile(
+        path.join(biblioDir, '03-original.json'),
+        JSON.stringify({ category: 'oc' }),
+      ),
+    ]);
+
+    const items = await buildGalleryManifest({ galleryDir, biblioDir });
+
+    expect(items.map((item) => item.id)).toEqual(['03-original', '02-fan-art', '01-commission']);
+    expect(items.every((item) => !('category' in item))).toBe(true);
+  });
 });

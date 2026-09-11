@@ -3,6 +3,12 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const IMAGE_EXTENSIONS = new Set(['.avif', '.jpeg', '.jpg', '.png', '.webp']);
+const CATEGORY_ORDER = new Map([
+  ['oc', 0],
+  ['fanart', 1],
+  ['commissions', 2],
+  ['uncategorized', 3],
+]);
 
 function humanizeFilename(filename) {
   return filename
@@ -65,21 +71,34 @@ function normalizeSeries(metadata) {
   };
 }
 
+function normalizeCategory(category) {
+  const value = typeof category === 'string' ? category.trim().toLowerCase() : '';
+  return CATEGORY_ORDER.has(value) ? value : 'uncategorized';
+}
+
 function arrangeSeries(records) {
   const anchors = new Map();
 
   records.forEach((record) => {
     if (!record.series) return;
-    const currentAnchor = anchors.get(record.series.name);
+    const seriesKey = `${record.category}:${record.series.name}`;
+    const currentAnchor = anchors.get(seriesKey);
     if (currentAnchor === undefined || record.sourceIndex < currentAnchor) {
-      anchors.set(record.series.name, record.sourceIndex);
+      anchors.set(seriesKey, record.sourceIndex);
     }
   });
 
   return records
     .sort((left, right) => {
-      const leftAnchor = left.series ? anchors.get(left.series.name) : left.sourceIndex;
-      const rightAnchor = right.series ? anchors.get(right.series.name) : right.sourceIndex;
+      const categoryDifference = CATEGORY_ORDER.get(left.category) - CATEGORY_ORDER.get(right.category);
+      if (categoryDifference !== 0) return categoryDifference;
+
+      const leftAnchor = left.series
+        ? anchors.get(`${left.category}:${left.series.name}`)
+        : left.sourceIndex;
+      const rightAnchor = right.series
+        ? anchors.get(`${right.category}:${right.series.name}`)
+        : right.sourceIndex;
       if (leftAnchor !== rightAnchor) return leftAnchor - rightAnchor;
 
       if (left.series?.name === right.series?.name) {
@@ -88,7 +107,7 @@ function arrangeSeries(records) {
 
       return left.sourceIndex - right.sourceIndex;
     })
-    .map(({ sourceIndex, series, ...item }) => item);
+    .map(({ sourceIndex, series, category, ...item }) => item);
 }
 
 async function findBackImage({ stem, metadata, biblioDir, biblioFiles }) {
@@ -131,6 +150,7 @@ export async function buildGalleryManifest({ galleryDir, biblioDir }) {
       return {
         sourceIndex,
         series: normalizeSeries(metadata),
+        category: normalizeCategory(metadata.category),
         id: stem,
         title: typeof metadata.title === 'string' && metadata.title.trim()
           ? metadata.title.trim()
