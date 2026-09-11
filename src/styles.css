@@ -637,9 +637,13 @@ h1 {
 }
 
 .gallery-grid {
-  column-count: 4;
+  position: relative;
   column-gap: 1rem;
   padding: clamp(1rem, 3vw, 2.5rem) clamp(1rem, 3.5vw, 4rem) clamp(4rem, 8vw, 8rem);
+}
+
+.gallery-grid--pending .art-card {
+  opacity: 0;
 }
 
 .art-card {
@@ -647,10 +651,9 @@ h1 {
   --tilt-y: 0deg;
   --pointer-x: 50%;
   --pointer-y: 50%;
-  position: relative;
-  display: inline-grid;
-  width: 100%;
-  margin: 0 0 1rem;
+  position: absolute;
+  display: grid;
+  margin: 0;
   padding: 0;
   break-inside: avoid;
   overflow: visible;
@@ -660,6 +663,9 @@ h1 {
   background: transparent;
   cursor: pointer;
   perspective: 1100px;
+}
+
+.gallery-grid--ready .art-card {
   animation: card-in 460ms calc(var(--entry-delay) + 120ms) ease both;
 }
 
@@ -1268,12 +1274,6 @@ h1 {
   }
 }
 
-@media (max-width: 1200px) {
-  .gallery-grid {
-    column-count: 3;
-  }
-}
-
 @media (max-width: 1050px) {
   .commissions-layout {
     grid-template-columns: 1fr;
@@ -1330,9 +1330,6 @@ h1 {
     font-size: clamp(4rem, 16vw, 7rem);
   }
 
-  .gallery-grid {
-    column-count: 2;
-  }
 }
 
 @media (max-width: 560px) {
@@ -1401,7 +1398,6 @@ h1 {
   }
 
   .gallery-grid {
-    column-count: 1;
     padding-inline: 0.75rem;
   }
 

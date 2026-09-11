@@ -10,6 +10,49 @@ export function calculateTilt({ x, y, width, height }, maxDegrees = 4) {
   };
 }
 
+export function getGalleryColumnCount(viewportWidth) {
+  if (viewportWidth <= 560) return 1;
+  if (viewportWidth <= 800) return 2;
+  if (viewportWidth <= 1200) return 3;
+  return 4;
+}
+
+export function calculateHorizontalMasonry({
+  containerWidth,
+  columnCount,
+  gap,
+  paddingTop,
+  paddingRight,
+  paddingBottom,
+  paddingLeft,
+  itemHeights,
+}) {
+  const safeColumnCount = Math.max(1, Math.floor(columnCount));
+  const availableWidth = Math.max(
+    0,
+    containerWidth - paddingLeft - paddingRight - gap * (safeColumnCount - 1),
+  );
+  const columnWidth = availableWidth / safeColumnCount;
+  const columnHeights = Array(safeColumnCount).fill(paddingTop);
+  const positions = itemHeights.map((itemHeight, index) => {
+    const column = index % safeColumnCount;
+    const position = {
+      column,
+      left: paddingLeft + column * (columnWidth + gap),
+      top: columnHeights[column],
+    };
+
+    columnHeights[column] += itemHeight + gap;
+    return position;
+  });
+  const tallestColumn = Math.max(...columnHeights);
+  const height = itemHeights.length
+    ? tallestColumn - gap + paddingBottom
+    : paddingTop + paddingBottom;
+
+  return { columnWidth, height, positions };
+}
+
 export async function loadGalleryManifest(baseUrl, fetcher = fetch) {
   const normalizedBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
   const response = await fetcher(`${normalizedBase}gallery-manifest.json`);
@@ -71,7 +114,7 @@ function createGalleryCard(item, index, baseUrl, onSelect) {
   const image = document.createElement('img');
   image.src = resolveAsset(baseUrl, item.src);
   image.alt = item.title;
-  image.loading = index < 4 ? 'eager' : 'lazy';
+  image.loading = 'eager';
   image.decoding = 'async';
   image.draggable = false;
 
@@ -89,8 +132,101 @@ function createGalleryCard(item, index, baseUrl, onSelect) {
   return card;
 }
 
+const galleryLayoutCleanups = new WeakMap();
+
+function installHorizontalMasonry(container) {
+  galleryLayoutCleanups.get(container)?.();
+
+  const cards = [...container.querySelectorAll('.art-card')];
+  const images = cards.map((card) => card.querySelector('img'));
+  let animationFrame = null;
+
+  const readPixels = (styles, property) => Number.parseFloat(styles[property]) || 0;
+
+  const layout = () => {
+    animationFrame = null;
+    const containerWidth = container.getBoundingClientRect().width;
+    if (containerWidth <= 0) return;
+
+    const styles = window.getComputedStyle(container);
+    const paddingTop = readPixels(styles, 'paddingTop');
+    const paddingRight = readPixels(styles, 'paddingRight');
+    const paddingBottom = readPixels(styles, 'paddingBottom');
+    const paddingLeft = readPixels(styles, 'paddingLeft');
+    const gap = readPixels(styles, 'columnGap');
+    const columnCount = getGalleryColumnCount(window.innerWidth);
+    const initialLayout = calculateHorizontalMasonry({
+      containerWidth,
+      columnCount,
+      gap,
+      paddingTop,
+      paddingRight,
+      paddingBottom,
+      paddingLeft,
+      itemHeights: [],
+    });
+
+    cards.forEach((card) => {
+      card.style.width = `${initialLayout.columnWidth}px`;
+    });
+
+    const masonry = calculateHorizontalMasonry({
+      containerWidth,
+      columnCount,
+      gap,
+      paddingTop,
+      paddingRight,
+      paddingBottom,
+      paddingLeft,
+      itemHeights: cards.map((card) => card.getBoundingClientRect().height),
+    });
+
+    cards.forEach((card, index) => {
+      const position = masonry.positions[index];
+      card.style.left = `${position.left}px`;
+      card.style.top = `${position.top}px`;
+    });
+    container.style.height = `${masonry.height}px`;
+
+    if (images.every((image) => image.complete)) {
+      container.classList.remove('gallery-grid--pending');
+      container.classList.add('gallery-grid--ready');
+    }
+  };
+
+  const scheduleLayout = () => {
+    if (animationFrame !== null) return;
+    animationFrame = window.requestAnimationFrame(layout);
+  };
+
+  images.forEach((image) => {
+    image.addEventListener('load', scheduleLayout);
+    image.addEventListener('error', scheduleLayout);
+  });
+
+  const resizeObserver = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(scheduleLayout);
+  resizeObserver?.observe(container);
+  window.addEventListener('resize', scheduleLayout);
+  window.addEventListener('hashchange', scheduleLayout);
+  document.fonts?.ready.then(scheduleLayout);
+  scheduleLayout();
+
+  galleryLayoutCleanups.set(container, () => {
+    if (animationFrame !== null) window.cancelAnimationFrame(animationFrame);
+    resizeObserver?.disconnect();
+    window.removeEventListener('resize', scheduleLayout);
+    window.removeEventListener('hashchange', scheduleLayout);
+    images.forEach((image) => {
+      image.removeEventListener('load', scheduleLayout);
+      image.removeEventListener('error', scheduleLayout);
+    });
+  });
+}
+
 export function renderGallery(container, items, onSelect = () => {}, baseUrl = '/') {
+  galleryLayoutCleanups.get(container)?.();
   container.replaceChildren();
+  container.style.removeProperty('height');
 
   if (items.length === 0) {
     container.className = 'gallery-state';
@@ -100,8 +236,9 @@ export function renderGallery(container, items, onSelect = () => {}, baseUrl = '
     return;
   }
 
-  container.className = 'gallery-grid';
+  container.className = 'gallery-grid gallery-grid--pending';
   const fragment = document.createDocumentFragment();
   items.forEach((item, index) => fragment.append(createGalleryCard(item, index, baseUrl, onSelect)));
   container.append(fragment);
+  installHorizontalMasonry(container);
 }

@@ -1,6 +1,53 @@
 import { describe, expect, test } from 'vitest';
 
-import { calculateTilt, loadGalleryManifest } from '../src/gallery.js';
+import {
+  calculateHorizontalMasonry,
+  calculateTilt,
+  getGalleryColumnCount,
+  loadGalleryManifest,
+} from '../src/gallery.js';
+
+describe('getGalleryColumnCount', () => {
+  test.each([
+    [1400, 4],
+    [1200, 3],
+    [900, 3],
+    [800, 2],
+    [600, 2],
+    [560, 1],
+    [320, 1],
+  ])('uses %i columns at a %ipx viewport', (viewportWidth, expected) => {
+    expect(getGalleryColumnCount(viewportWidth)).toBe(expected);
+  });
+});
+
+describe('calculateHorizontalMasonry', () => {
+  test('fills each visual row from left to right while keeping masonry packing', () => {
+    expect(
+      calculateHorizontalMasonry({
+        containerWidth: 860,
+        columnCount: 4,
+        gap: 20,
+        paddingTop: 20,
+        paddingRight: 20,
+        paddingBottom: 30,
+        paddingLeft: 20,
+        itemHeights: [100, 200, 150, 120, 90, 80],
+      }),
+    ).toEqual({
+      columnWidth: 190,
+      height: 350,
+      positions: [
+        { column: 0, left: 20, top: 20 },
+        { column: 1, left: 230, top: 20 },
+        { column: 2, left: 440, top: 20 },
+        { column: 3, left: 650, top: 20 },
+        { column: 0, left: 20, top: 140 },
+        { column: 1, left: 230, top: 240 },
+      ],
+    });
+  });
+});
 
 describe('calculateTilt', () => {
   test('returns no rotation at the card center', () => {
