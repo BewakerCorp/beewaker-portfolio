@@ -55,6 +55,42 @@ function normalizeCredit(credit) {
   return { label, url };
 }
 
+function normalizeSeries(metadata) {
+  const name = typeof metadata.series === 'string' ? metadata.series.trim() : '';
+  if (!name) return null;
+
+  return {
+    name,
+    order: Number.isInteger(metadata.seriesOrder) ? metadata.seriesOrder : Number.MAX_SAFE_INTEGER,
+  };
+}
+
+function arrangeSeries(records) {
+  const anchors = new Map();
+
+  records.forEach((record) => {
+    if (!record.series) return;
+    const currentAnchor = anchors.get(record.series.name);
+    if (currentAnchor === undefined || record.sourceIndex < currentAnchor) {
+      anchors.set(record.series.name, record.sourceIndex);
+    }
+  });
+
+  return records
+    .sort((left, right) => {
+      const leftAnchor = left.series ? anchors.get(left.series.name) : left.sourceIndex;
+      const rightAnchor = right.series ? anchors.get(right.series.name) : right.sourceIndex;
+      if (leftAnchor !== rightAnchor) return leftAnchor - rightAnchor;
+
+      if (left.series?.name === right.series?.name) {
+        return left.series.order - right.series.order || left.sourceIndex - right.sourceIndex;
+      }
+
+      return left.sourceIndex - right.sourceIndex;
+    })
+    .map(({ sourceIndex, series, ...item }) => item);
+}
+
 async function findBackImage({ stem, metadata, biblioDir, biblioFiles }) {
   const requested = typeof metadata.backImage === 'string' ? path.basename(metadata.backImage) : null;
   const candidates = requested
@@ -85,14 +121,16 @@ export async function buildGalleryManifest({ galleryDir, biblioDir }) {
     .filter((filename) => IMAGE_EXTENSIONS.has(path.extname(filename).toLowerCase()))
     .sort((left, right) => left.localeCompare(right, 'en', { sensitivity: 'base' }));
 
-  return Promise.all(
-    artworkFiles.map(async (filename) => {
+  const records = await Promise.all(
+    artworkFiles.map(async (filename, sourceIndex) => {
       const extension = path.extname(filename);
       const stem = path.basename(filename, extension);
       const metadata = await readMetadata(path.join(biblioDir, `${stem}.json`));
       const backImage = await findBackImage({ stem, metadata, biblioDir, biblioFiles });
 
       return {
+        sourceIndex,
+        series: normalizeSeries(metadata),
         id: stem,
         title: typeof metadata.title === 'string' && metadata.title.trim()
           ? metadata.title.trim()
@@ -108,6 +146,8 @@ export async function buildGalleryManifest({ galleryDir, biblioDir }) {
       };
     }),
   );
+
+  return arrangeSeries(records);
 }
 
 async function writeDefaultManifest() {

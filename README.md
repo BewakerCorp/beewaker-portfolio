@@ -14,6 +14,8 @@ A lightweight artwork portfolio with a masonry gallery and a two-sided 3D inspec
    {
      "title": "Forest God",
      "year": 2026,
+     "series": "forest",
+     "seriesOrder": 1,
      "characters": ["Character name"],
      "description": "Text shown on the reverse side.",
      "credit": {
@@ -22,6 +24,8 @@ A lightweight artwork portfolio with a masonry gallery and a two-sided 3D inspec
      }
    }
    ```
+
+   Works with the same optional `series` value are kept together in the gallery. Use `seriesOrder` to set their order inside that block. Neither field is shown to visitors, and the numeric label beside each title is generated from the final gallery order.
 
 4. Optionally put a custom reverse image in `public/biblio/forest-god-back.webp`. It is detected automatically. You can also name another supported image in the JSON with `"backImage": "filename.webp"`. Linked credits accept only `http://` and `https://` URLs and appear when the reverse side faces the viewer.
 5. Commit the files to `main`. GitHub Actions regenerates the gallery manifest and republishes the site.

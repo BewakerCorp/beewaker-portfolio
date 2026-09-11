@@ -146,4 +146,33 @@ describe('buildGalleryManifest', () => {
 
     expect(items.map((item) => item.id)).toEqual(['Alpha', 'middle', 'zeta']);
   });
+
+  test('keeps artworks from the same series together without changing filename ids', async () => {
+    const { galleryDir, biblioDir } = await makeContentTree();
+    await Promise.all([
+      writeFile(path.join(galleryDir, '01-opening.webp'), 'image'),
+      writeFile(path.join(galleryDir, '02-series-sketch.webp'), 'image'),
+      writeFile(path.join(galleryDir, '03-standalone.webp'), 'image'),
+      writeFile(path.join(galleryDir, '04-series-finish.webp'), 'image'),
+      writeFile(path.join(galleryDir, '05-closing.webp'), 'image'),
+      writeFile(
+        path.join(biblioDir, '02-series-sketch.json'),
+        JSON.stringify({ series: 'example', seriesOrder: 1 }),
+      ),
+      writeFile(
+        path.join(biblioDir, '04-series-finish.json'),
+        JSON.stringify({ series: 'example', seriesOrder: 2 }),
+      ),
+    ]);
+
+    const items = await buildGalleryManifest({ galleryDir, biblioDir });
+
+    expect(items.map((item) => item.id)).toEqual([
+      '01-opening',
+      '02-series-sketch',
+      '04-series-finish',
+      '03-standalone',
+      '05-closing',
+    ]);
+  });
 });
