@@ -3,6 +3,7 @@ import { describe, expect, test } from 'vitest';
 import {
   calculateHorizontalMasonry,
   calculateTilt,
+  galleryImageAttributes,
   getGalleryColumnCount,
   loadGalleryManifest,
 } from '../src/gallery.js';
@@ -68,6 +69,17 @@ describe('calculateTilt', () => {
 
   test('returns no rotation for an invalid element size', () => {
     expect(calculateTilt({ x: 20, y: 20, width: 0, height: 0 }, 5)).toEqual({ rotateX: 0, rotateY: 0 });
+  });
+});
+
+describe('galleryImageAttributes', () => {
+  test('lazy-loads decorative thumbnails inside named buttons', () => {
+    expect(galleryImageAttributes()).toEqual({
+      alt: '',
+      loading: 'lazy',
+      decoding: 'async',
+      draggable: false,
+    });
   });
 });
 

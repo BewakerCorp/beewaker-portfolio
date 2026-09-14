@@ -100,6 +100,19 @@ function attachCardTilt(card) {
   });
 }
 
+export function galleryImageAttributes() {
+  return {
+    alt: '',
+    loading: 'lazy',
+    decoding: 'async',
+    draggable: false,
+  };
+}
+
+function markGalleryCardReady(card) {
+  card.classList.add('is-ready');
+}
+
 function createGalleryCard(item, index, baseUrl, onSelect) {
   const card = document.createElement('button');
   card.className = 'art-card';
@@ -113,10 +126,7 @@ function createGalleryCard(item, index, baseUrl, onSelect) {
 
   const image = document.createElement('img');
   image.src = resolveAsset(baseUrl, item.src);
-  image.alt = item.title;
-  image.loading = 'eager';
-  image.decoding = 'async';
-  image.draggable = false;
+  Object.assign(image, galleryImageAttributes());
 
   const label = document.createElement('span');
   label.className = 'art-card__label';
@@ -188,10 +198,8 @@ function installHorizontalMasonry(container) {
     });
     container.style.height = `${masonry.height}px`;
 
-    if (images.every((image) => image.complete)) {
-      container.classList.remove('gallery-grid--pending');
-      container.classList.add('gallery-grid--ready');
-    }
+    container.classList.remove('gallery-grid--pending');
+    container.classList.add('gallery-grid--ready');
   };
 
   const scheduleLayout = () => {
@@ -199,9 +207,19 @@ function installHorizontalMasonry(container) {
     animationFrame = window.requestAnimationFrame(layout);
   };
 
-  images.forEach((image) => {
-    image.addEventListener('load', scheduleLayout);
-    image.addEventListener('error', scheduleLayout);
+  const revealHandlers = images.map((image, index) => {
+    const card = cards[index];
+    const onReveal = () => {
+      markGalleryCardReady(card);
+      scheduleLayout();
+    };
+    if (image.complete) {
+      markGalleryCardReady(card);
+      return null;
+    }
+    image.addEventListener('load', onReveal);
+    image.addEventListener('error', onReveal);
+    return onReveal;
   });
 
   const resizeObserver = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(scheduleLayout);
@@ -216,9 +234,11 @@ function installHorizontalMasonry(container) {
     resizeObserver?.disconnect();
     window.removeEventListener('resize', scheduleLayout);
     window.removeEventListener('hashchange', scheduleLayout);
-    images.forEach((image) => {
-      image.removeEventListener('load', scheduleLayout);
-      image.removeEventListener('error', scheduleLayout);
+    images.forEach((image, index) => {
+      const onReveal = revealHandlers[index];
+      if (!onReveal) return;
+      image.removeEventListener('load', onReveal);
+      image.removeEventListener('error', onReveal);
     });
   });
 }
@@ -231,6 +251,7 @@ export function renderGallery(container, items, onSelect = () => {}, baseUrl = '
   if (items.length === 0) {
     container.className = 'gallery-state';
     const message = document.createElement('p');
+    message.setAttribute('aria-live', 'polite');
     message.textContent = 'No visual records have been added yet.';
     container.append(message);
     return;

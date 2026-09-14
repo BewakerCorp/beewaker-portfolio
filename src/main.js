@@ -66,6 +66,7 @@ loadGalleryManifest(import.meta.env.BASE_URL)
     galleryElement.className = 'gallery-state gallery-state--error';
     galleryElement.replaceChildren();
     const message = document.createElement('p');
+    message.setAttribute('aria-live', 'polite');
     message.textContent = 'The visual archive could not be loaded.';
     galleryElement.append(message);
   });
