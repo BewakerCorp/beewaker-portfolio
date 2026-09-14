@@ -158,6 +158,118 @@ describe('rotation input', () => {
   });
 });
 
+describe('inspector viewport reset', () => {
+  test('keeps the status live region and removes other viewport children', () => {
+    const status = {
+      hasAttribute: (name) => name === 'data-inspector-status',
+      remove() {
+        this.removed = true;
+      },
+    };
+    const canvas = {
+      hasAttribute: () => false,
+      remove() {
+        this.removed = true;
+      },
+    };
+    const credit = {
+      hasAttribute: () => false,
+      remove() {
+        this.removed = true;
+      },
+    };
+
+    inspector.resetInspectorViewport({ children: [status, canvas, credit] });
+
+    expect(status.removed).toBeUndefined();
+    expect(canvas.removed).toBe(true);
+    expect(credit.removed).toBe(true);
+  });
+});
+
+describe('inspector Enter shortcut', () => {
+  test('flips on Enter unless the focused control is a link or field', () => {
+    expect(
+      inspector.shouldFlipInspectorOnKeydown({ key: 'Enter', target: { closest: () => null } }),
+    ).toBe(true);
+    expect(
+      inspector.shouldFlipInspectorOnKeydown({
+        key: 'Enter',
+        target: { closest: (selector) => (String(selector).includes('a[href]') ? {} : null) },
+      }),
+    ).toBe(false);
+  });
+
+  test('does not steal Escape, Space, or repeated keys', () => {
+    const target = { closest: () => null };
+    expect(inspector.shouldFlipInspectorOnKeydown({ key: 'Escape', target })).toBe(false);
+    expect(inspector.shouldFlipInspectorOnKeydown({ key: ' ', target })).toBe(false);
+    expect(inspector.shouldFlipInspectorOnKeydown({ key: 'Enter', repeat: true, target })).toBe(false);
+  });
+});
+
+describe('inspector reverse footer', () => {
+  test('does not print the artwork filename on the reverse face', () => {
+    expect(
+      inspector.getInspectorBackFooterText({
+        id: '15-forest-god',
+        title: 'Forest God',
+        year: 2026,
+      }),
+    ).toBe('');
+  });
+});
+
+describe('inspector GPU cleanup', () => {
+  test('disposes renderer, textures, geometry, and materials', () => {
+    const calls = [];
+    const sharedMaterial = { dispose: () => calls.push('material') };
+    inspector.disposeInspectorGpuResources({
+      renderer: {
+        dispose: () => calls.push('renderer'),
+        forceContextLoss: () => calls.push('loss'),
+        domElement: { remove: () => calls.push('canvas') },
+      },
+      textures: [{ dispose: () => calls.push('texture') }],
+      geometry: { dispose: () => calls.push('geometry') },
+      materials: [sharedMaterial, sharedMaterial],
+    });
+
+    expect(calls).toEqual(['texture', 'geometry', 'material', 'renderer', 'loss', 'canvas']);
+  });
+});
+
+describe('inspector focus restore', () => {
+  test('returns focus to the trigger when it is still visible', () => {
+    const focused = [];
+    const trigger = {
+      isConnected: true,
+      closest: () => null,
+      focus: (options) => focused.push(['trigger', options]),
+    };
+
+    inspector.restoreInspectorFocus(trigger);
+
+    expect(focused).toEqual([['trigger', { preventScroll: true }]]);
+  });
+
+  test('focuses the archive mark when the trigger is inside a hidden section', () => {
+    const focused = [];
+    const home = { focus: (options) => focused.push(['home', options]) };
+    const trigger = {
+      isConnected: true,
+      closest: (selector) => (String(selector).includes('[hidden]') ? {} : null),
+      focus: () => focused.push(['trigger']),
+    };
+
+    inspector.restoreInspectorFocus(trigger, {
+      querySelector: (selector) => (selector === '[data-nav-target="home"]' ? home : null),
+    });
+
+    expect(focused).toEqual([['home', { preventScroll: true }]]);
+  });
+});
+
 describe('fitInspectorSpan', () => {
   test('widens the camera view so a square card fits on a narrow phone', () => {
     expect(fitInspectorSpan(4, 4, 390, 725)).toBe(8.5513);

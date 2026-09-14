@@ -10,6 +10,11 @@ export function navigateTo(section, locationObject = window.location) {
   locationObject.hash = destination === 'home' ? '' : destination;
 }
 
+export function applyLocationChange({ hash = '', inspector, root = globalThis.document } = {}) {
+  inspector?.close?.();
+  return renderSection(getSectionFromHash(hash), root);
+}
+
 export function renderSection(section, root = document) {
   const destination = SECTIONS.has(section) ? section : 'home';
 
