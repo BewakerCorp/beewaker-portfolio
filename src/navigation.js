@@ -11,8 +11,9 @@ export function navigateTo(section, locationObject = window.location) {
 }
 
 export function applyLocationChange({ hash = '', inspector, root = globalThis.document } = {}) {
+  const section = renderSection(getSectionFromHash(hash), root);
   inspector?.close?.();
-  return renderSection(getSectionFromHash(hash), root);
+  return section;
 }
 
 export function renderSection(section, root = document) {

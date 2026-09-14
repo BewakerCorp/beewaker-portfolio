@@ -47,18 +47,23 @@ describe('applyLocationChange', () => {
     };
   }
 
-  test('closes the inspector before showing the new section', () => {
+  test('closes the inspector after the new section is visible', () => {
     const order = [];
     const root = fakeRoot('portfolio');
+    const commissions = root.querySelectorAll('[data-section]')[2];
 
     applyLocationChange({
       hash: '#commissions',
-      inspector: { close: () => order.push('close') },
+      inspector: {
+        close: () => {
+          order.push('close');
+          order.push(commissions.hidden);
+        },
+      },
       root,
     });
 
-    const commissions = root.querySelectorAll('[data-section]')[2];
-    expect(order).toEqual(['close']);
+    expect(order).toEqual(['close', false]);
     expect(commissions.hidden).toBe(false);
   });
 

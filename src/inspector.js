@@ -359,7 +359,10 @@ export function createInspector(dialog, baseUrl = '/') {
       const textureLoader = new THREE.TextureLoader();
       const frontTexture = await textureLoader.loadAsync(resolveAsset(baseUrl, item.src));
       textures.push(frontTexture);
-      if (token !== openToken || !dialog.open) return;
+      if (token !== openToken || !dialog.open) {
+        runCleanup();
+        return;
+      }
       frontTexture.colorSpace = THREE.SRGBColorSpace;
       frontTexture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
 
@@ -376,7 +379,10 @@ export function createInspector(dialog, baseUrl = '/') {
         backTexture = new THREE.CanvasTexture(makeInformationCanvas(item, ratio));
       }
       textures.push(backTexture);
-      if (token !== openToken || !dialog.open) return;
+      if (token !== openToken || !dialog.open) {
+        runCleanup();
+        return;
+      }
       backTexture.colorSpace = THREE.SRGBColorSpace;
       backTexture.anisotropy = frontTexture.anisotropy;
 
@@ -399,7 +405,6 @@ export function createInspector(dialog, baseUrl = '/') {
       let velocityX = 0;
       let velocityY = 0;
       let velocityZ = 0;
-      let frameId = 0;
 
       function updateCreditVisibility(faceAlignment, focusCredit = false) {
         if (!creditLink) return;
