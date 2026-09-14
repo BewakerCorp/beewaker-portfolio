@@ -125,8 +125,8 @@ function createGalleryCard(item, index, baseUrl, onSelect) {
   frame.className = 'art-card__frame';
 
   const image = document.createElement('img');
-  image.src = resolveAsset(baseUrl, item.src);
   Object.assign(image, galleryImageAttributes());
+  image.src = resolveAsset(baseUrl, item.src);
 
   const label = document.createElement('span');
   label.className = 'art-card__label';
