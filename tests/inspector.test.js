@@ -220,6 +220,13 @@ describe('inspector reverse footer', () => {
   });
 });
 
+describe('inspector session tokens', () => {
+  test('treats only the current open token as the live session', () => {
+    expect(inspector.isCurrentInspectorSession(3, 3)).toBe(true);
+    expect(inspector.isCurrentInspectorSession(2, 3)).toBe(false);
+  });
+});
+
 describe('inspector GPU cleanup', () => {
   test('disposes renderer, textures, geometry, and materials', () => {
     const calls = [];

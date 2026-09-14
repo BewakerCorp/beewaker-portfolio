@@ -69,6 +69,10 @@ export function disposeInspectorGpuResources({
   renderer?.domElement?.remove?.();
 }
 
+export function isCurrentInspectorSession(sessionToken, currentToken) {
+  return sessionToken === currentToken;
+}
+
 export function restoreInspectorFocus(trigger, root = globalThis.document) {
   const hidden = !trigger?.isConnected || Boolean(trigger.closest?.('[hidden], [aria-hidden="true"]'));
   if (!trigger || hidden) {
@@ -325,7 +329,9 @@ export function createInspector(dialog, baseUrl = '/') {
 
     const runCleanup = () => {
       cancelAnimationFrame(frameId);
-      flipHandler = null;
+      if (isCurrentInspectorSession(token, openToken)) {
+        flipHandler = null;
+      }
       unbind();
       unbind = () => {};
       disposeInspectorGpuResources({ renderer, textures, geometry, materials });
@@ -542,8 +548,9 @@ export function createInspector(dialog, baseUrl = '/') {
     } catch (error) {
       console.error(error);
       runCleanup();
+      if (!isCurrentInspectorSession(token, openToken)) return;
       cleanupScene = () => {};
-      if (token === openToken && dialog.open) {
+      if (dialog.open) {
         setStatus('This visual record could not be rendered.', 'error');
       }
     }
