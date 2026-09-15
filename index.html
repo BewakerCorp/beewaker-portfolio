@@ -8,6 +8,35 @@
       content="Beewaker's character art, illustrations, and 3D renders — an archive focused on design, mood, and atmosphere."
     />
     <meta name="theme-color" content="#090a09" />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
+    <link rel="canonical" href="https://bewakercorp.github.io/beewaker-portfolio/" />
+    <link rel="icon" href="%BASE_URL%favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="%BASE_URL%apple-touch-icon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Beewaker Art Archive" />
+    <meta property="og:title" content="Beewaker — Art Archive" />
+    <meta
+      property="og:description"
+      content="Character art, illustrations, and 3D renders collected in Beewaker's visual archive."
+    />
+    <meta property="og:url" content="https://bewakercorp.github.io/beewaker-portfolio/" />
+    <meta
+      property="og:image"
+      content="https://bewakercorp.github.io/beewaker-portfolio/social-card.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Beewaker Art Archive — Things found in the dark." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Beewaker — Art Archive" />
+    <meta
+      name="twitter:description"
+      content="Character art, illustrations, and 3D renders collected in Beewaker's visual archive."
+    />
+    <meta
+      name="twitter:image"
+      content="https://bewakercorp.github.io/beewaker-portfolio/social-card.png"
+    />
     <title>Beewaker — Art Archive</title>
   </head>
   <body>
@@ -68,9 +97,9 @@
             <p>Select an artwork to inspect it.</p>
           </header>
 
-          <div id="gallery" class="gallery-state" aria-live="polite">
+          <div id="gallery" class="gallery-state">
             <span class="loader-mark" aria-hidden="true"></span>
-            <p>The archive is being indexed.</p>
+            <p aria-live="polite">The archive is being indexed.</p>
           </div>
         </section>
 
@@ -197,6 +226,9 @@
 
       <footer class="archive-footer">
         <span>© BEEWAKER</span>
+        <span class="archive-footer__rights">
+          Third-party characters and settings belong to their respective owners.
+        </span>
       </footer>
     </div>
 

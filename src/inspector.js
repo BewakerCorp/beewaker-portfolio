@@ -27,6 +27,60 @@ export function isBackFaceVisible(faceAlignment, threshold = 0.82) {
   return Number.isFinite(faceAlignment) && faceAlignment <= -Math.abs(threshold);
 }
 
+export function resetInspectorViewport(viewport) {
+  if (!viewport) return;
+
+  for (const child of [...viewport.children]) {
+    if (!child.hasAttribute?.('data-inspector-status')) child.remove();
+  }
+}
+
+export function shouldFlipInspectorOnKeydown(event) {
+  if (event?.key !== 'Enter' || event.repeat) return false;
+
+  const target = event.target;
+  if (
+    typeof target?.closest === 'function' &&
+    target.closest('button, a[href], textarea, input, select, [contenteditable="true"]')
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+export function getInspectorInitialFocusTarget({ flipButton, closeButton } = {}) {
+  return flipButton || closeButton || null;
+}
+
+export function disposeInspectorGpuResources({
+  renderer,
+  textures = [],
+  geometry,
+  materials = [],
+} = {}) {
+  textures.forEach((texture) => texture?.dispose?.());
+  geometry?.dispose?.();
+  [...new Set(materials.filter(Boolean))].forEach((material) => material.dispose?.());
+  renderer?.dispose?.();
+  renderer?.forceContextLoss?.();
+  renderer?.domElement?.remove?.();
+}
+
+export function isCurrentInspectorSession(sessionToken, currentToken) {
+  return sessionToken === currentToken;
+}
+
+export function restoreInspectorFocus(trigger, root = globalThis.document) {
+  const hidden = !trigger?.isConnected || Boolean(trigger.closest?.('[hidden], [aria-hidden="true"]'));
+  if (!trigger || hidden) {
+    root?.querySelector?.('[data-nav-target="home"]')?.focus?.({ preventScroll: true });
+    return;
+  }
+
+  trigger.focus({ preventScroll: true });
+}
+
 export function createArtworkCreditLink(item, documentRoot = document) {
   if (!item.credit?.label || !item.credit?.url) return null;
 
@@ -207,6 +261,7 @@ export function createInspector(dialog, baseUrl = '/') {
   let activeTrigger = null;
   let openToken = 0;
   let cleanupScene = () => {};
+  let flipHandler = null;
   let previousOverflow = '';
 
   function setStatus(message, state = '') {
@@ -228,41 +283,72 @@ export function createInspector(dialog, baseUrl = '/') {
     close();
   }
 
+  function onDialogKeydown(event) {
+    if (!flipHandler || !shouldFlipInspectorOnKeydown(event)) return;
+    event.preventDefault();
+    flipHandler(event);
+  }
+
   function onDialogClose() {
     openToken += 1;
+    flipHandler = null;
     cleanupScene();
     cleanupScene = () => {};
     document.documentElement.style.overflow = previousOverflow;
-    activeTrigger?.focus({ preventScroll: true });
+    restoreInspectorFocus(activeTrigger);
     activeTrigger = null;
   }
 
   async function open(item, trigger) {
     openToken += 1;
     const token = openToken;
+    flipHandler = null;
     cleanupScene();
     cleanupScene = () => {};
-    viewport.replaceChildren();
+    resetInspectorViewport(viewport);
     activeTrigger = trigger;
     title.textContent = item.title;
     setStatus('Loading visual record…', 'loading');
     previousOverflow = document.documentElement.style.overflow;
     document.documentElement.style.overflow = 'hidden';
     if (!dialog.open) dialog.showModal();
-    closeButton.focus({ preventScroll: true });
+    getInspectorInitialFocusTarget({ flipButton, closeButton })?.focus({ preventScroll: true });
+
+    let renderer;
+    const textures = [];
+    let geometry;
+    let materials = [];
+    let frameId = 0;
+    let unbind = () => {};
+    let creditLink = null;
+
+    const runCleanup = () => {
+      cancelAnimationFrame(frameId);
+      if (isCurrentInspectorSession(token, openToken)) flipHandler = null;
+      unbind();
+      unbind = () => {};
+      disposeInspectorGpuResources({ renderer, textures, geometry, materials });
+      creditLink?.remove();
+      renderer = undefined;
+      textures.length = 0;
+      geometry = undefined;
+      materials = [];
+    };
+
+    cleanupScene = runCleanup;
 
     try {
       const THREE = await import('three');
       if (token !== openToken || !dialog.open) return;
 
-      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.domElement.className = 'inspector__canvas';
       renderer.domElement.setAttribute('aria-label', `${item.title}, rotatable artwork card`);
       renderer.domElement.setAttribute('role', 'img');
       viewport.append(renderer.domElement);
-      const creditLink = createArtworkCreditLink(item);
+      creditLink = createArtworkCreditLink(item);
       if (creditLink) viewport.append(creditLink);
 
       const scene = new THREE.Scene();
@@ -271,9 +357,9 @@ export function createInspector(dialog, baseUrl = '/') {
 
       const textureLoader = new THREE.TextureLoader();
       const frontTexture = await textureLoader.loadAsync(resolveAsset(baseUrl, item.src));
+      textures.push(frontTexture);
       if (token !== openToken || !dialog.open) {
-        frontTexture.dispose();
-        renderer.dispose();
+        runCleanup();
         return;
       }
       frontTexture.colorSpace = THREE.SRGBColorSpace;
@@ -288,23 +374,20 @@ export function createInspector(dialog, baseUrl = '/') {
       let backTexture;
       if (item.backImage) {
         backTexture = await textureLoader.loadAsync(resolveAsset(baseUrl, item.backImage));
-        backTexture.colorSpace = THREE.SRGBColorSpace;
-        backTexture.anisotropy = frontTexture.anisotropy;
       } else {
         backTexture = new THREE.CanvasTexture(makeInformationCanvas(item, ratio));
-        backTexture.colorSpace = THREE.SRGBColorSpace;
-        backTexture.anisotropy = frontTexture.anisotropy;
       }
+      textures.push(backTexture);
 
       if (token !== openToken || !dialog.open) {
-        frontTexture.dispose();
-        backTexture.dispose();
-        renderer.dispose();
+        runCleanup();
         return;
       }
+      backTexture.colorSpace = THREE.SRGBColorSpace;
+      backTexture.anisotropy = frontTexture.anisotropy;
 
-      const geometry = new THREE.BoxGeometry(dimensions.width, dimensions.height, dimensions.depth, 1, 1, 1);
-      const materials = createCardMaterials(THREE, frontTexture, backTexture);
+      geometry = new THREE.BoxGeometry(dimensions.width, dimensions.height, dimensions.depth, 1, 1, 1);
+      materials = createCardMaterials(THREE, frontTexture, backTexture);
       const card = new THREE.Mesh(geometry, materials);
       card.rotation.set(0.04, -0.08, 0);
       scene.add(card);
@@ -322,7 +405,6 @@ export function createInspector(dialog, baseUrl = '/') {
       let velocityX = 0;
       let velocityY = 0;
       let velocityZ = 0;
-      let frameId = 0;
 
       function updateCreditVisibility(faceAlignment, focusCredit = false) {
         if (!creditLink) return;
@@ -342,6 +424,8 @@ export function createInspector(dialog, baseUrl = '/') {
         viewDirection.copy(camera.position).sub(card.position).normalize();
         updateCreditVisibility(worldFaceNormal.dot(viewDirection), event.detail === 0);
       }
+
+      flipHandler = onFlip;
 
       function resize() {
         const bounds = viewport.getBoundingClientRect();
@@ -435,17 +519,13 @@ export function createInspector(dialog, baseUrl = '/') {
       renderer.domElement.addEventListener('pointercancel', endPointer);
       renderer.domElement.addEventListener('dblclick', resetCard);
       renderer.domElement.addEventListener('wheel', onWheel, { passive: false });
-      renderer.domElement.addEventListener('contextmenu', (event) => event.preventDefault());
+      const onContextMenu = (event) => event.preventDefault();
+      renderer.domElement.addEventListener('contextmenu', onContextMenu);
       flipButton.addEventListener('click', onFlip);
       window.addEventListener('resize', resize);
       const viewportObserver = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(resize);
       viewportObserver?.observe(viewport);
-      resize();
-      animate();
-      setStatus('', 'ready');
-
-      cleanupScene = () => {
-        cancelAnimationFrame(frameId);
+      unbind = () => {
         window.removeEventListener('resize', resize);
         viewportObserver?.disconnect();
         renderer.domElement.removeEventListener('pointerdown', onPointerDown);
@@ -454,18 +534,19 @@ export function createInspector(dialog, baseUrl = '/') {
         renderer.domElement.removeEventListener('pointercancel', endPointer);
         renderer.domElement.removeEventListener('dblclick', resetCard);
         renderer.domElement.removeEventListener('wheel', onWheel);
+        renderer.domElement.removeEventListener('contextmenu', onContextMenu);
         flipButton.removeEventListener('click', onFlip);
-        geometry.dispose();
-        [...new Set(materials)].forEach((material) => material.dispose());
-        frontTexture.dispose();
-        backTexture.dispose();
-        renderer.dispose();
-        renderer.domElement.remove();
-        creditLink?.remove();
       };
+
+      resize();
+      animate();
+      setStatus('', 'ready');
     } catch (error) {
       console.error(error);
-      if (token === openToken && dialog.open) {
+      runCleanup();
+      if (!isCurrentInspectorSession(token, openToken)) return;
+      cleanupScene = () => {};
+      if (dialog.open) {
         setStatus('This visual record could not be rendered.', 'error');
       }
     }
@@ -474,6 +555,7 @@ export function createInspector(dialog, baseUrl = '/') {
   closeButton.addEventListener('click', close);
   dialog.addEventListener('pointerdown', onBackdropPointerDown);
   dialog.addEventListener('cancel', onCancel);
+  dialog.addEventListener('keydown', onDialogKeydown);
   dialog.addEventListener('close', onDialogClose);
 
   return {
@@ -481,10 +563,12 @@ export function createInspector(dialog, baseUrl = '/') {
     close,
     destroy() {
       close();
+      flipHandler = null;
       cleanupScene();
       closeButton.removeEventListener('click', close);
       dialog.removeEventListener('pointerdown', onBackdropPointerDown);
       dialog.removeEventListener('cancel', onCancel);
+      dialog.removeEventListener('keydown', onDialogKeydown);
       dialog.removeEventListener('close', onDialogClose);
     },
   };

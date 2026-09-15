@@ -3,11 +3,13 @@ import './styles.css';
 import { createCustomCursor } from './cursor.js';
 import { loadGalleryManifest, renderGallery } from './gallery.js';
 import { createInspector } from './inspector.js';
-import { getSectionFromHash, navigateTo, renderSection } from './navigation.js';
+import { applyLocationChange, navigateTo } from './navigation.js';
 import { createSocialWeb } from './social-web.js';
 
+let inspector = { close() {}, open() {}, destroy() {} };
+
 function syncSection() {
-  renderSection(getSectionFromHash(window.location.hash));
+  applyLocationChange({ hash: window.location.hash, inspector });
 }
 
 document.addEventListener('click', (event) => {
@@ -25,7 +27,7 @@ syncSection();
 const galleryElement = document.querySelector('#gallery');
 const inspectorDialog = document.querySelector('#art-inspector');
 const customCursor = createCustomCursor();
-const inspector = createInspector(inspectorDialog, import.meta.env.BASE_URL);
+inspector = createInspector(inspectorDialog, import.meta.env.BASE_URL);
 const socialWeb = createSocialWeb(document.querySelector('[data-social-web]'));
 
 function restoreCursorLayer() {
@@ -66,6 +68,7 @@ loadGalleryManifest(import.meta.env.BASE_URL)
     galleryElement.className = 'gallery-state gallery-state--error';
     galleryElement.replaceChildren();
     const message = document.createElement('p');
+    message.setAttribute('aria-live', 'polite');
     message.textContent = 'The visual archive could not be loaded.';
     galleryElement.append(message);
   });

@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Beewaker Art Archive — Things found in the dark">
+  <defs>
+    <pattern id="grid" width="52" height="52" patternUnits="userSpaceOnUse">
+      <path d="M52 0H0V52" fill="none" stroke="#d3d0bd" stroke-opacity=".045"/>
+    </pattern>
+    <radialGradient id="signal" cx="82%" cy="20%" r="60%">
+      <stop offset="0" stop-color="#7e2025" stop-opacity=".34"/>
+      <stop offset="1" stop-color="#090a09" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="rule" x1="0" x2="1">
+      <stop stop-color="#b33a3d"/>
+      <stop offset="1" stop-color="#b33a3d" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#090a09"/>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  <rect width="1200" height="630" fill="url(#signal)"/>
+  <path d="M56 56h74M56 56v74M1144 574h-74M1144 574v-74" fill="none" stroke="#5f6059" stroke-opacity=".52" stroke-width="2"/>
+
+  <circle cx="89" cy="105" r="8" fill="#b33a3d"/>
+  <text x="116" y="103" fill="#d3d0bd" font-family="DejaVu Serif, Georgia, serif" font-size="28" font-weight="700" letter-spacing="6">BEEWAKER</text>
+  <text x="116" y="130" fill="#77796f" font-family="DejaVu Sans Mono, monospace" font-size="13" letter-spacing="5">ART ARCHIVE</text>
+
+  <text x="82" y="270" fill="#d3d0bd" font-family="DejaVu Serif, Georgia, serif" font-size="82" letter-spacing="1">Things found</text>
+  <text x="82" y="360" fill="#d3d0bd" font-family="DejaVu Serif, Georgia, serif" font-size="82" letter-spacing="1">in the dark.</text>
+  <rect x="82" y="399" width="485" height="3" fill="url(#rule)"/>
+
+  <text x="82" y="485" fill="#9dae83" font-family="DejaVu Sans Mono, monospace" font-size="17" letter-spacing="4">CHARACTER ART / ILLUSTRATION / 3D</text>
+  <text x="82" y="548" fill="#77796f" font-family="DejaVu Sans Mono, monospace" font-size="14" letter-spacing="2">BEWAKERCORP.GITHUB.IO/BEEWAKER-PORTFOLIO</text>
+
+  <circle cx="1003" cy="306" r="87" fill="none" stroke="#7e2025" stroke-width="3"/>
+  <circle cx="1003" cy="306" r="25" fill="#b33a3d"/>
+  <circle cx="1003" cy="306" r="8" fill="#d3d0bd"/>
+  <path d="M1003 183v55M1003 374v55M880 306h55M1071 306h55" fill="none" stroke="#77796f" stroke-opacity=".65" stroke-width="2"/>
+</svg>

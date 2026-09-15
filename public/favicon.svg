@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Beewaker archive signal">
+  <rect width="64" height="64" rx="10" fill="#090a09"/>
+  <path d="M9 9h15M9 9v15M55 55H40M55 55V40" fill="none" stroke="#4a4b45" stroke-width="2"/>
+  <circle cx="32" cy="32" r="15" fill="none" stroke="#7e2025" stroke-width="2"/>
+  <circle cx="32" cy="32" r="5" fill="#b33a3d"/>
+  <circle cx="32" cy="32" r="1.8" fill="#d3d0bd"/>
+</svg>

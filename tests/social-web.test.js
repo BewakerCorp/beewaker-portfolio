@@ -1,6 +1,11 @@
 import { describe, expect, test } from 'vitest';
 
-import { SOCIAL_LINKS, createWebGeometry, stepWebNodes } from '../src/social-web.js';
+import {
+  SOCIAL_LINKS,
+  createWebGeometry,
+  shouldAnimateSocialWeb,
+  stepWebNodes,
+} from '../src/social-web.js';
 
 describe('createWebGeometry', () => {
   test('builds radial and circular threads for every web point', () => {
@@ -57,5 +62,28 @@ describe('SOCIAL_LINKS', () => {
       href: 'https://www.commissions.gg/beewaker',
       unavailable: true,
     });
+  });
+
+  test('strips copied share-tracking parameters from TikTok profile URLs', () => {
+    const tiktoks = SOCIAL_LINKS.filter((social) => social.id.startsWith('tiktok'));
+    expect(tiktoks).toHaveLength(2);
+    for (const social of tiktoks) expect(new URL(social.href).search).toBe('');
+  });
+
+  test('shows public TikTok handles instead of internal old and new labels', () => {
+    expect(SOCIAL_LINKS.find((social) => social.id === 'tiktok-main')?.label).toBe(
+      'TikTok · @bewakwe',
+    );
+    expect(SOCIAL_LINKS.find((social) => social.id === 'tiktok-new')?.label).toBe(
+      'TikTok · @beewaker.re',
+    );
+  });
+});
+
+describe('shouldAnimateSocialWeb', () => {
+  test('animates only while the socials screen is visible and motion is allowed', () => {
+    expect(shouldAnimateSocialWeb?.({ section: 'socials', reducedMotion: false })).toBe(true);
+    expect(shouldAnimateSocialWeb?.({ section: 'home', reducedMotion: false })).toBe(false);
+    expect(shouldAnimateSocialWeb?.({ section: 'socials', reducedMotion: true })).toBe(false);
   });
 });

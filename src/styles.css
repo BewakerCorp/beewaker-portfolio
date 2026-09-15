@@ -642,8 +642,12 @@ h1 {
   padding: clamp(1rem, 3vw, 2.5rem) clamp(1rem, 3.5vw, 4rem) clamp(4rem, 8vw, 8rem);
 }
 
-.gallery-grid--pending .art-card {
+.art-card:not(.is-ready) {
   opacity: 0;
+}
+
+.art-card:not(.is-ready) .art-card__frame {
+  min-height: 12rem;
 }
 
 .art-card {
@@ -665,7 +669,7 @@ h1 {
   perspective: 1100px;
 }
 
-.gallery-grid--ready .art-card {
+.gallery-grid--ready .art-card.is-ready {
   animation: card-in 460ms calc(var(--entry-delay) + 120ms) ease both;
 }
 
@@ -778,6 +782,8 @@ h1 {
 }
 
 .commissions-heading h1 {
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-size: clamp(4rem, 8vw, 8rem);
   line-height: 0.82;
 }
@@ -1235,6 +1241,13 @@ h1 {
   letter-spacing: 0.13em;
 }
 
+.archive-footer__rights {
+  max-width: 44rem;
+  padding-block: 0.75rem;
+  text-align: right;
+  line-height: 1.45;
+}
+
 @keyframes section-in {
   from {
     opacity: 0;
@@ -1337,6 +1350,18 @@ h1 {
     display: none;
   }
 
+  .archive-footer {
+    align-items: start;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding-block: 0.8rem;
+  }
+
+  .archive-footer__rights {
+    padding-block: 0;
+    text-align: left;
+  }
+
   .screen--home {
     padding-top: 3.5rem;
   }
@@ -1371,11 +1396,19 @@ h1 {
   }
 
   .screen--commissions {
+    min-width: 0;
     padding-inline: 0.75rem;
   }
 
+  .commissions-heading,
+  .commission-prices {
+    min-width: 0;
+    max-width: 100%;
+  }
+
   .commissions-heading h1 {
-    font-size: clamp(3.8rem, 20vw, 6rem);
+    font-size: clamp(2.5rem, 12vw, 6rem);
+    line-height: 0.9;
   }
 
   .commission-scope__columns,
@@ -1413,12 +1446,17 @@ h1 {
   }
 
   .inspector__header {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: 0.75rem;
   }
 
-  .inspector__header h2 {
+  .inspector__index {
     display: none;
+  }
+
+  .inspector__header h2 {
+    max-width: none;
+    min-width: 0;
   }
 
   .inspector__close span,
@@ -1429,6 +1467,16 @@ h1 {
 
   .inspector__close {
     padding-inline: 0.7rem;
+  }
+}
+
+@media (pointer: coarse) {
+  .inspector__controls span {
+    display: none;
+  }
+
+  .inspector__flip kbd {
+    display: none;
   }
 }
 

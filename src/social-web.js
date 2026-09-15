@@ -28,16 +28,16 @@ export const SOCIAL_LINKS = Object.freeze([
   {
     id: 'tiktok-main',
     mark: 'Tk',
-    label: 'TikTok - old main',
-    href: 'https://www.tiktok.com/@bewakwe?_r=1&_t=ZT-99IdmYSSXl8',
+    label: 'TikTok · @bewakwe',
+    href: 'https://www.tiktok.com/@bewakwe',
     ring: 3,
     spoke: 7,
   },
   {
     id: 'tiktok-new',
     mark: 'Tk',
-    label: 'TikTok - new account',
-    href: 'https://www.tiktok.com/@beewaker.re?_r=1&_t=ZS-99IdhtE5ikb',
+    label: 'TikTok · @beewaker.re',
+    href: 'https://www.tiktok.com/@beewaker.re',
     ring: 3,
     spoke: 3,
   },
@@ -51,6 +51,14 @@ export const SOCIAL_LINKS = Object.freeze([
     spoke: 5,
   },
 ]);
+
+export function shouldAnimateSocialWeb({ section, reducedMotion }) {
+  return section === 'socials' && !reducedMotion;
+}
+
+function currentSection() {
+  return globalThis.document?.documentElement?.getAttribute('data-current-section') || '';
+}
 
 function webNodeIndex(ring, spoke, spokes) {
   return 1 + (ring - 1) * spokes + spoke;
@@ -260,10 +268,15 @@ export function createSocialWeb(root) {
   }
 
   function animate(time) {
+    if (!shouldAnimateSocialWeb({ section: currentSection(), reducedMotion })) {
+      frameId = 0;
+      return;
+    }
+
     const elapsed = Math.min(32, time - lastTime || 16) / 16;
     lastTime = time;
 
-    if (geometry && !reducedMotion) {
+    if (geometry) {
       stepWebNodes(geometry.nodes, pointer, {
         radius: Math.max(140, Math.min(230, geometry.width * 0.18)),
         repel: 0.78 * elapsed,
@@ -274,6 +287,16 @@ export function createSocialWeb(root) {
     }
 
     frameId = requestAnimationFrame(animate);
+  }
+
+  function syncVisibility() {
+    rebuild();
+    const shouldAnimate = shouldAnimateSocialWeb({ section: currentSection(), reducedMotion });
+    if (shouldAnimate && !frameId) frameId = requestAnimationFrame(animate);
+    if (!shouldAnimate && frameId) {
+      cancelAnimationFrame(frameId);
+      frameId = 0;
+    }
   }
 
   function updatePointer(event) {
@@ -294,14 +317,15 @@ export function createSocialWeb(root) {
   const resizeObserver = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(rebuild);
   resizeObserver?.observe(root);
   window.addEventListener('resize', rebuild);
-  rebuild();
-  if (!reducedMotion) frameId = requestAnimationFrame(animate);
+  window.addEventListener('hashchange', syncVisibility);
+  syncVisibility();
 
   return {
     destroy() {
       cancelAnimationFrame(frameId);
       resizeObserver?.disconnect();
       window.removeEventListener('resize', rebuild);
+      window.removeEventListener('hashchange', syncVisibility);
       root.removeEventListener('pointermove', updatePointer);
       root.removeEventListener('pointerleave', clearPointer);
     },
