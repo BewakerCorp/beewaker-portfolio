@@ -829,6 +829,7 @@ h1 {
 }
 
 .commission-scope h3,
+.commission-terms h3,
 .commission-usage h3 {
   margin: 0 0 0.7rem;
   color: var(--paper);
@@ -904,21 +905,24 @@ h1 {
   font-weight: 500;
 }
 
-.commission-usage {
+.commission-terms {
   margin-top: 1.5rem;
   padding-top: 1.35rem;
   border-top: 1px solid rgba(207, 53, 62, 0.42);
 }
 
-.commission-usage p {
+.commission-terms p {
   margin: 0;
   color: #b7b5aa;
   font-size: var(--text-small);
   line-height: 1.65;
 }
 
-.commission-usage p + p {
+.commission-terms p + p {
   margin-top: 0.8rem;
+}
+
+.commission-usage p:nth-of-type(2) {
   color: #d88a8e;
 }
 

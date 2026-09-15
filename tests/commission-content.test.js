@@ -12,6 +12,39 @@ describe('commission heading', () => {
   });
 });
 
+describe('commission ordering terms', () => {
+  test('explains what to send and when an order is accepted', () => {
+    expect(page).toMatch(/character references/i);
+    expect(page).toMatch(/pose and expression/i);
+    expect(page).toMatch(/preferred\s+deadline/i);
+    expect(page).toContain('The order is confirmed only after I explicitly accept it');
+  });
+
+  test('documents the staged Boosty payment flow', () => {
+    expect(page).toContain('Orders up to $25 require full payment before work begins.');
+    expect(page).toContain('Orders above $25 require a 50% payment before work begins.');
+    expect(page).toContain('The remaining 50% is paid after the protected final preview is approved.');
+    expect(page).toContain('Clean full-resolution files are delivered only after full payment.');
+    expect(page).not.toContain('Payment through Boosty is requested only after the sketch is ready.');
+  });
+
+  test('documents revisions, cancellation, delivery and delay handling', () => {
+    expect(page).toContain('up to two rounds of revisions');
+    expect(page).toContain('payments are non-refundable');
+    expect(page).toContain('PNG and/or JPG');
+    expect(page).toContain('Source and project files are not included.');
+    expect(page).toContain('the remaining payment may be reduced depending on the length of the delay');
+  });
+
+  test('documents additional pricing and usage boundaries', () => {
+    expect(page).toContain('Additional character: +80% of the base price.');
+    expect(page).toContain('Highly complex character design: up to +50%.');
+    expect(page).toContain('Rush orders may be available');
+    expect(page).toContain('Commercial use, resale, and redistribution for profit are not permitted');
+    expect(page).toContain('Privacy can be discussed before the order is accepted.');
+  });
+});
+
 describe('gallery live region', () => {
   test('announces loading without making all artwork buttons a live region', () => {
     expect(page).not.toMatch(/id="gallery"[^>]*aria-live/);
