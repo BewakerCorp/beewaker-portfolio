@@ -109,6 +109,26 @@ export function galleryImageAttributes() {
   };
 }
 
+const GALLERY_MEDIUMS = Object.freeze([
+  Object.freeze({
+    medium: '2d',
+    title: '2D ART',
+    emptyMessage: 'No 2D works have been added yet.',
+  }),
+  Object.freeze({
+    medium: '3d',
+    title: '3D RENDERS',
+    emptyMessage: 'No 3D renders have been added yet.',
+  }),
+]);
+
+export function groupGalleryItems(items = []) {
+  return GALLERY_MEDIUMS.map((section) => ({
+    ...section,
+    items: items.filter((item) => (item.medium === '3d' ? '3d' : '2d') === section.medium),
+  }));
+}
+
 function markGalleryCardReady(card) {
   card.classList.add('is-ready');
 }
@@ -244,22 +264,38 @@ function installHorizontalMasonry(container) {
 }
 
 export function renderGallery(container, items, onSelect = () => {}, baseUrl = '/') {
-  galleryLayoutCleanups.get(container)?.();
+  container.querySelectorAll?.('.gallery-grid').forEach((grid) => galleryLayoutCleanups.get(grid)?.());
   container.replaceChildren();
   container.style.removeProperty('height');
-
-  if (items.length === 0) {
-    container.className = 'gallery-state';
-    const message = document.createElement('p');
-    message.setAttribute('aria-live', 'polite');
-    message.textContent = 'No visual records have been added yet.';
-    container.append(message);
-    return;
-  }
-
-  container.className = 'gallery-grid gallery-grid--pending';
+  container.className = 'gallery-sections';
   const fragment = document.createDocumentFragment();
-  items.forEach((item, index) => fragment.append(createGalleryCard(item, index, baseUrl, onSelect)));
+
+  groupGalleryItems(items).forEach(({ medium, title, emptyMessage, items: sectionItems }) => {
+    const section = document.createElement('section');
+    section.className = 'gallery-section';
+    section.dataset.medium = medium;
+
+    const heading = document.createElement('h2');
+    heading.className = 'gallery-section__title';
+    heading.textContent = title;
+
+    const sectionContent = document.createElement('div');
+    if (sectionItems.length === 0) {
+      sectionContent.className = 'gallery-state gallery-state--empty';
+      const message = document.createElement('p');
+      message.textContent = emptyMessage;
+      sectionContent.append(message);
+    } else {
+      sectionContent.className = 'gallery-grid gallery-grid--pending';
+      sectionItems.forEach((item, index) => {
+        sectionContent.append(createGalleryCard(item, index, baseUrl, onSelect));
+      });
+    }
+
+    section.append(heading, sectionContent);
+    fragment.append(section);
+  });
+
   container.append(fragment);
-  installHorizontalMasonry(container);
+  container.querySelectorAll('.gallery-grid').forEach(installHorizontalMasonry);
 }

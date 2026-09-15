@@ -18,3 +18,10 @@ describe('mobile inspector and commissions layout', () => {
     expect(css).toMatch(/@media\s*\(pointer:\s*coarse\)[\s\S]*?\.inspector__controls span/);
   });
 });
+
+describe('portfolio medium sections', () => {
+  test('styles visible section headings separately from masonry grids', () => {
+    expect(css).toMatch(/\.gallery-section__title\s*\{/);
+    expect(css).toMatch(/\.gallery-section\s*\+\s*\.gallery-section/);
+  });
+});

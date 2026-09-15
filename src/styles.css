@@ -636,6 +636,46 @@ h1 {
   color: #b96e6e;
 }
 
+.gallery-sections {
+  display: block;
+}
+
+.gallery-section {
+  position: relative;
+}
+
+.gallery-section + .gallery-section {
+  border-top: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(126, 32, 37, 0.07), transparent 18rem);
+}
+
+.gallery-section__title {
+  margin: 0;
+  padding: clamp(2rem, 4vw, 3.75rem) clamp(1rem, 3.5vw, 4rem) clamp(1.25rem, 2.5vw, 2rem);
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 6vw, 5.5rem);
+  font-weight: 500;
+  line-height: 0.9;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(201, 197, 174, 0.12);
+}
+
+.gallery-section__title::before {
+  display: inline-block;
+  width: clamp(1.5rem, 4vw, 4rem);
+  height: 1px;
+  margin-right: clamp(0.75rem, 1.5vw, 1.5rem);
+  vertical-align: 0.24em;
+  content: '';
+  background: var(--blood-bright);
+}
+
+.gallery-section .gallery-state {
+  min-height: clamp(15rem, 30vh, 24rem);
+}
+
 .gallery-grid {
   position: relative;
   column-gap: 1rem;

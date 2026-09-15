@@ -7,6 +7,7 @@ import {
   getGalleryColumnCount,
   loadGalleryManifest,
 } from '../src/gallery.js';
+import * as galleryModule from '../src/gallery.js';
 
 describe('getGalleryColumnCount', () => {
   test.each([
@@ -79,6 +80,28 @@ describe('galleryImageAttributes', () => {
       loading: 'lazy',
       decoding: 'async',
       draggable: false,
+    });
+  });
+});
+
+describe('gallery medium sections', () => {
+  test('always creates separate 2D and 3D sections with independent item lists', () => {
+    const drawing = { id: 'drawing', medium: '2d' };
+    const render = { id: 'render', medium: '3d' };
+    const legacyDrawing = { id: 'legacy' };
+
+    expect(galleryModule.groupGalleryItems?.([drawing, render, legacyDrawing])).toEqual([
+      { medium: '2d', title: '2D ART', emptyMessage: 'No 2D works have been added yet.', items: [drawing, legacyDrawing] },
+      { medium: '3d', title: '3D RENDERS', emptyMessage: 'No 3D renders have been added yet.', items: [render] },
+    ]);
+  });
+
+  test('keeps the empty 3D section visible before the first render is added', () => {
+    expect(galleryModule.groupGalleryItems?.([{ id: 'drawing', medium: '2d' }])[1]).toEqual({
+      medium: '3d',
+      title: '3D RENDERS',
+      emptyMessage: 'No 3D renders have been added yet.',
+      items: [],
     });
   });
 });

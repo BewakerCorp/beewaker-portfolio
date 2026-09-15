@@ -34,6 +34,7 @@ describe('buildGalleryManifest', () => {
 
     expect(items).toEqual([
       {
+        medium: '2d',
         id: 'forest-god',
         title: 'Forest God',
         src: 'gallery/forest-god.webp',
@@ -44,6 +45,19 @@ describe('buildGalleryManifest', () => {
         credit: null,
       },
     ]);
+  });
+
+  test('marks an artwork as a 3D render only when its metadata requests it', async () => {
+    const { galleryDir, biblioDir } = await makeContentTree();
+    await writeFile(path.join(galleryDir, 'room-render.webp'), 'image');
+    await writeFile(
+      path.join(biblioDir, 'room-render.json'),
+      JSON.stringify({ medium: '3d' }),
+    );
+
+    const [item] = await buildGalleryManifest({ galleryDir, biblioDir });
+
+    expect(item.medium).toBe('3d');
   });
 
   test('includes a linked character credit from artwork metadata', async () => {

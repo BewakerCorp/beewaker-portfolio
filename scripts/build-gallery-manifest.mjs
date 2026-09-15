@@ -3,6 +3,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const IMAGE_EXTENSIONS = new Set(['.avif', '.jpeg', '.jpg', '.png', '.webp']);
+const MEDIUM_ORDER = new Map([
+  ['2d', 0],
+  ['3d', 1],
+]);
 const CATEGORY_ORDER = new Map([
   ['oc', 0],
   ['fanart', 1],
@@ -76,12 +80,17 @@ function normalizeCategory(category) {
   return CATEGORY_ORDER.has(value) ? value : 'uncategorized';
 }
 
+function normalizeMedium(medium) {
+  const value = typeof medium === 'string' ? medium.trim().toLowerCase() : '';
+  return MEDIUM_ORDER.has(value) ? value : '2d';
+}
+
 function arrangeSeries(records) {
   const anchors = new Map();
 
   records.forEach((record) => {
     if (!record.series) return;
-    const seriesKey = `${record.category}:${record.series.name}`;
+    const seriesKey = `${record.medium}:${record.category}:${record.series.name}`;
     const currentAnchor = anchors.get(seriesKey);
     if (currentAnchor === undefined || record.sourceIndex < currentAnchor) {
       anchors.set(seriesKey, record.sourceIndex);
@@ -90,14 +99,17 @@ function arrangeSeries(records) {
 
   return records
     .sort((left, right) => {
+      const mediumDifference = MEDIUM_ORDER.get(left.medium) - MEDIUM_ORDER.get(right.medium);
+      if (mediumDifference !== 0) return mediumDifference;
+
       const categoryDifference = CATEGORY_ORDER.get(left.category) - CATEGORY_ORDER.get(right.category);
       if (categoryDifference !== 0) return categoryDifference;
 
       const leftAnchor = left.series
-        ? anchors.get(`${left.category}:${left.series.name}`)
+        ? anchors.get(`${left.medium}:${left.category}:${left.series.name}`)
         : left.sourceIndex;
       const rightAnchor = right.series
-        ? anchors.get(`${right.category}:${right.series.name}`)
+        ? anchors.get(`${right.medium}:${right.category}:${right.series.name}`)
         : right.sourceIndex;
       if (leftAnchor !== rightAnchor) return leftAnchor - rightAnchor;
 
@@ -151,6 +163,7 @@ export async function buildGalleryManifest({ galleryDir, biblioDir }) {
         sourceIndex,
         series: normalizeSeries(metadata),
         category: normalizeCategory(metadata.category),
+        medium: normalizeMedium(metadata.medium),
         id: stem,
         title: typeof metadata.title === 'string' && metadata.title.trim()
           ? metadata.title.trim()
