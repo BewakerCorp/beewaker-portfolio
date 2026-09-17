@@ -831,10 +831,9 @@ h1 {
 .commissions-layout {
   display: grid;
   grid-template-columns: minmax(290px, 0.72fr) minmax(0, 1.55fr);
-  grid-template-areas:
-    'copy prices'
-    'copy checkout';
+  grid-template-areas: 'copy offer';
   gap: clamp(1.25rem, 2.8vw, 3rem);
+  align-items: start;
   padding-top: clamp(1.5rem, 3vw, 2.75rem);
 }
 
@@ -966,8 +965,15 @@ h1 {
   color: #d88a8e;
 }
 
+.commission-offer {
+  grid-area: offer;
+  display: grid;
+  align-content: start;
+  min-width: 0;
+  gap: clamp(1.25rem, 2.8vw, 3rem);
+}
+
 .commission-prices {
-  grid-area: prices;
   align-self: start;
   margin: 0;
   border: 1px solid var(--line);
@@ -992,7 +998,6 @@ h1 {
 }
 
 .commission-checkout {
-  grid-area: checkout;
   display: grid;
   grid-template-columns: minmax(190px, 0.55fr) minmax(0, 1.45fr);
   gap: 1rem;
@@ -1241,7 +1246,8 @@ h1 {
   color: var(--paper);
   text-align: center;
   text-transform: uppercase;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  white-space: normal;
   letter-spacing: 0.11em;
   font-size: var(--text-micro);
   border: 1px solid var(--line-strong);
@@ -1340,7 +1346,16 @@ h1 {
       'checkout';
   }
 
+  .commission-offer {
+    display: contents;
+  }
+
+  .commission-prices {
+    grid-area: prices;
+  }
+
   .commission-checkout {
+    grid-area: checkout;
     grid-template-columns: minmax(190px, 0.5fr) minmax(0, 1.5fr);
   }
 }

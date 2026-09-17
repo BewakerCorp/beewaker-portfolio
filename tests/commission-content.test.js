@@ -3,6 +3,24 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
 
 const page = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+
+function extractDivByClass(className) {
+  const marker = `<div class="${className}">`;
+  const start = page.indexOf(marker);
+  if (start === -1) return '';
+
+  const tagPattern = /<div\b[^>]*>|<\/div>/g;
+  tagPattern.lastIndex = start;
+  let depth = 0;
+  let match;
+
+  while ((match = tagPattern.exec(page))) {
+    depth += match[0].startsWith('</') ? -1 : 1;
+    if (depth === 0) return page.slice(start, tagPattern.lastIndex);
+  }
+
+  return '';
+}
 const license = readFileSync(new URL('../LICENSE', import.meta.url), 'utf8');
 
 describe('commission heading', () => {
@@ -42,6 +60,16 @@ describe('commission ordering terms', () => {
     expect(page).toContain('Rush orders may be available');
     expect(page).toContain('Commercial use, resale, and redistribution for profit are not permitted');
     expect(page).toContain('Privacy can be discussed before the order is accepted.');
+  });
+});
+
+describe('commission offer layout', () => {
+  test('groups the price sheet and checkout separately from the long terms copy', () => {
+    const offer = extractDivByClass('commission-offer');
+
+    expect(offer).toContain('class="commission-prices"');
+    expect(offer).toContain('class="commission-checkout"');
+    expect(offer).not.toContain('class="commissions-copy"');
   });
 });
 
