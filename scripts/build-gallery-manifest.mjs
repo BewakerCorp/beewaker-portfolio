@@ -86,6 +86,10 @@ function normalizeMedium(medium) {
   return MEDIUM_ORDER.has(value) ? value : '2d';
 }
 
+function normalizePortfolioOrder(value) {
+  return Number.isInteger(value) && value >= 0 ? value : null;
+}
+
 function normalizePublicAssetPath(value) {
   if (typeof value !== 'string') return null;
   const trimmed = value.trim().replaceAll('\\', '/');
@@ -153,9 +157,11 @@ function arrangeSeries(records) {
       const mediumDifference = MEDIUM_ORDER.get(left.medium) - MEDIUM_ORDER.get(right.medium);
       if (mediumDifference !== 0) return mediumDifference;
 
-      // Numbered 2D filenames are chronological. New additions use the next
-      // number, so descending source order keeps the freshest work on top.
-      if (left.medium === '2d') return right.sourceIndex - left.sourceIndex;
+      if (left.medium === '2d') {
+        const leftOrder = left.portfolioOrder ?? left.sourceIndex;
+        const rightOrder = right.portfolioOrder ?? right.sourceIndex;
+        return rightOrder - leftOrder || right.sourceIndex - left.sourceIndex;
+      }
 
       const categoryDifference = CATEGORY_ORDER.get(left.category) - CATEGORY_ORDER.get(right.category);
       if (categoryDifference !== 0) return categoryDifference;
@@ -174,7 +180,7 @@ function arrangeSeries(records) {
 
       return left.sourceIndex - right.sourceIndex;
     })
-    .map(({ sourceIndex, series, category, ...item }) => item);
+    .map(({ sourceIndex, series, category, portfolioOrder, ...item }) => item);
 }
 
 async function findBackImage({ stem, metadata, biblioDir, biblioFiles }) {
@@ -218,6 +224,7 @@ export async function buildGalleryManifest({ galleryDir, biblioDir }) {
 
       return {
         sourceIndex,
+        portfolioOrder: normalizePortfolioOrder(metadata.portfolioOrder),
         series: normalizeSeries(metadata),
         category: normalizeCategory(metadata.category),
         medium,

@@ -261,6 +261,36 @@ describe('buildGalleryManifest', () => {
     ]);
   });
 
+  test('uses explicit portfolio order for 2D artworks before filename fallback', async () => {
+    const { galleryDir, biblioDir } = await makeContentTree();
+    await Promise.all([
+      writeFile(path.join(galleryDir, '01-first-file.webp'), 'image'),
+      writeFile(path.join(galleryDir, '02-second-file.webp'), 'image'),
+      writeFile(path.join(galleryDir, '03-third-file.webp'), 'image'),
+      writeFile(
+        path.join(biblioDir, '01-first-file.json'),
+        JSON.stringify({ portfolioOrder: 2 }),
+      ),
+      writeFile(
+        path.join(biblioDir, '02-second-file.json'),
+        JSON.stringify({ portfolioOrder: 3 }),
+      ),
+      writeFile(
+        path.join(biblioDir, '03-third-file.json'),
+        JSON.stringify({ portfolioOrder: 1 }),
+      ),
+    ]);
+
+    const items = await buildGalleryManifest({ galleryDir, biblioDir });
+
+    expect(items.map((item) => item.id)).toEqual([
+      '02-second-file',
+      '01-first-file',
+      '03-third-file',
+    ]);
+    expect(items.every((item) => !('portfolioOrder' in item))).toBe(true);
+  });
+
   test('keeps artworks from the same series together without changing filename ids', async () => {
     const { galleryDir, biblioDir } = await makeContentTree();
     await Promise.all([
