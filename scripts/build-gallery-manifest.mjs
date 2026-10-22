@@ -153,6 +153,10 @@ function arrangeSeries(records) {
       const mediumDifference = MEDIUM_ORDER.get(left.medium) - MEDIUM_ORDER.get(right.medium);
       if (mediumDifference !== 0) return mediumDifference;
 
+      // Numbered 2D filenames are chronological. New additions use the next
+      // number, so descending source order keeps the freshest work on top.
+      if (left.medium === '2d') return right.sourceIndex - left.sourceIndex;
+
       const categoryDifference = CATEGORY_ORDER.get(left.category) - CATEGORY_ORDER.get(right.category);
       if (categoryDifference !== 0) return categoryDifference;
 

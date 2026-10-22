@@ -219,7 +219,7 @@ describe('buildGalleryManifest', () => {
     expect(warning).toHaveBeenCalledOnce();
   });
 
-  test('sorts discovered artwork deterministically by filename', async () => {
+  test('sorts discovered 2D artwork deterministically by newest filename first', async () => {
     const { galleryDir, biblioDir } = await makeContentTree();
     await Promise.all([
       writeFile(path.join(galleryDir, 'zeta.webp'), 'image'),
@@ -229,7 +229,36 @@ describe('buildGalleryManifest', () => {
 
     const items = await buildGalleryManifest({ galleryDir, biblioDir });
 
-    expect(items.map((item) => item.id)).toEqual(['Alpha', 'middle', 'zeta']);
+    expect(items.map((item) => item.id)).toEqual(['zeta', 'middle', 'Alpha']);
+  });
+
+  test('shows newer numbered 2D artworks before older ones regardless of category', async () => {
+    const { galleryDir, biblioDir } = await makeContentTree();
+    await Promise.all([
+      writeFile(path.join(galleryDir, '01-original.webp'), 'image'),
+      writeFile(path.join(galleryDir, '02-fan-art.webp'), 'image'),
+      writeFile(path.join(galleryDir, '03-commission.webp'), 'image'),
+      writeFile(
+        path.join(biblioDir, '01-original.json'),
+        JSON.stringify({ category: 'oc' }),
+      ),
+      writeFile(
+        path.join(biblioDir, '02-fan-art.json'),
+        JSON.stringify({ category: 'fanart' }),
+      ),
+      writeFile(
+        path.join(biblioDir, '03-commission.json'),
+        JSON.stringify({ category: 'commissions' }),
+      ),
+    ]);
+
+    const items = await buildGalleryManifest({ galleryDir, biblioDir });
+
+    expect(items.map((item) => item.id)).toEqual([
+      '03-commission',
+      '02-fan-art',
+      '01-original',
+    ]);
   });
 
   test('keeps artworks from the same series together without changing filename ids', async () => {
@@ -242,12 +271,15 @@ describe('buildGalleryManifest', () => {
       writeFile(path.join(galleryDir, '05-closing.webp'), 'image'),
       writeFile(
         path.join(biblioDir, '02-series-sketch.json'),
-        JSON.stringify({ series: 'example', seriesOrder: 1 }),
+        JSON.stringify({ medium: '3d', series: 'example', seriesOrder: 1 }),
       ),
       writeFile(
         path.join(biblioDir, '04-series-finish.json'),
-        JSON.stringify({ series: 'example', seriesOrder: 2 }),
+        JSON.stringify({ medium: '3d', series: 'example', seriesOrder: 2 }),
       ),
+      writeFile(path.join(biblioDir, '01-opening.json'), JSON.stringify({ medium: '3d' })),
+      writeFile(path.join(biblioDir, '03-standalone.json'), JSON.stringify({ medium: '3d' })),
+      writeFile(path.join(biblioDir, '05-closing.json'), JSON.stringify({ medium: '3d' })),
     ]);
 
     const items = await buildGalleryManifest({ galleryDir, biblioDir });
@@ -269,15 +301,15 @@ describe('buildGalleryManifest', () => {
       writeFile(path.join(galleryDir, '03-original.webp'), 'image'),
       writeFile(
         path.join(biblioDir, '01-commission.json'),
-        JSON.stringify({ category: 'commissions' }),
+        JSON.stringify({ medium: '3d', category: 'commissions' }),
       ),
       writeFile(
         path.join(biblioDir, '02-fan-art.json'),
-        JSON.stringify({ category: 'fanart' }),
+        JSON.stringify({ medium: '3d', category: 'fanart' }),
       ),
       writeFile(
         path.join(biblioDir, '03-original.json'),
-        JSON.stringify({ category: 'oc' }),
+        JSON.stringify({ medium: '3d', category: 'oc' }),
       ),
     ]);
 
