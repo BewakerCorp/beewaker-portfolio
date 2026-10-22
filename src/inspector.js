@@ -1,3 +1,9 @@
+import {
+  createMediaInspectorView,
+  getInspectorMode,
+  getInspectorModeHint,
+} from './media-inspector.js';
+
 export function fitCardDimensions(imageWidth, imageHeight, maxSpan = 4) {
   const safeRatio = imageWidth > 0 && imageHeight > 0 ? imageWidth / imageHeight : 0.75;
   const width = safeRatio >= 1 ? maxSpan : maxSpan * safeRatio;
@@ -258,6 +264,8 @@ export function createInspector(dialog, baseUrl = '/') {
   const title = dialog.querySelector('[data-inspector-title]');
   const closeButton = dialog.querySelector('[data-inspector-close]');
   const flipButton = dialog.querySelector('[data-inspector-flip]');
+  const artworkControls = [...dialog.querySelectorAll('[data-inspector-artwork-control]')];
+  const mediaHint = dialog.querySelector('[data-inspector-media-hint]');
   let activeTrigger = null;
   let openToken = 0;
   let cleanupScene = () => {};
@@ -268,6 +276,17 @@ export function createInspector(dialog, baseUrl = '/') {
     status.textContent = message;
     status.dataset.state = state;
     status.hidden = !message;
+  }
+
+  function setControlMode(mode) {
+    const artworkMode = mode === 'artwork';
+    artworkControls.forEach((control) => {
+      control.hidden = !artworkMode;
+    });
+    if (mediaHint) {
+      mediaHint.hidden = artworkMode;
+      mediaHint.textContent = artworkMode ? '' : getInspectorModeHint(mode);
+    }
   }
 
   function close() {
@@ -294,6 +313,8 @@ export function createInspector(dialog, baseUrl = '/') {
     flipHandler = null;
     cleanupScene();
     cleanupScene = () => {};
+    viewport.dataset.mode = '';
+    setControlMode('artwork');
     document.documentElement.style.overflow = previousOverflow;
     restoreInspectorFocus(activeTrigger);
     activeTrigger = null;
@@ -308,11 +329,30 @@ export function createInspector(dialog, baseUrl = '/') {
     resetInspectorViewport(viewport);
     activeTrigger = trigger;
     title.textContent = item.title;
+    const mode = getInspectorMode(item);
+    viewport.dataset.mode = mode;
+    setControlMode(mode);
     setStatus('Loading visual record…', 'loading');
     previousOverflow = document.documentElement.style.overflow;
     document.documentElement.style.overflow = 'hidden';
     if (!dialog.open) dialog.showModal();
-    getInspectorInitialFocusTarget({ flipButton, closeButton })?.focus({ preventScroll: true });
+    if (mode === 'artwork') {
+      getInspectorInitialFocusTarget({ flipButton, closeButton })?.focus({ preventScroll: true });
+    }
+
+    if (mode !== 'artwork') {
+      try {
+        const mediaView = createMediaInspectorView({ item, viewport, baseUrl, setStatus });
+        cleanupScene = mediaView.cleanup;
+        (mediaView.initialFocus || closeButton)?.focus?.({ preventScroll: true });
+      } catch (error) {
+        console.error(error);
+        cleanupScene = () => {};
+        setStatus('This visual record could not be rendered.', 'error');
+        closeButton?.focus?.({ preventScroll: true });
+      }
+      return;
+    }
 
     let renderer;
     const textures = [];

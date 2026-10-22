@@ -1,0 +1,15 @@
+{
+  "title": "Gribobas; Entity",
+  "year": 2026,
+  "category": "oc",
+  "medium": "3d",
+  "mediaType": "turntable",
+  "characters": ["Gribobas"],
+  "description": "Gribobas is a sentient humanoid mushroom grown by Sunny to help her with experiments and handle heavy lifting around the storage areas. Unfortunately, his mental development never progressed beyond that of a five-year-old child. He understands simple things well enough, but anything more complicated tends to go over his head. He can easily get upset or offended over the smallest things.",
+  "media": {
+    "framePattern": "turntables/gribobas/Gribobas{frame}.webp",
+    "frameCount": 48,
+    "startFrame": 0,
+    "framePadding": 4
+  }
+}

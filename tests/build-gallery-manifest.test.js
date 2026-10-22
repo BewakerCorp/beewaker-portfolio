@@ -35,6 +35,8 @@ describe('buildGalleryManifest', () => {
     expect(items).toEqual([
       {
         medium: '2d',
+        mediaType: 'artwork',
+        media: null,
         id: 'forest-god',
         title: 'Forest God',
         src: 'gallery/forest-god.webp',
@@ -58,6 +60,75 @@ describe('buildGalleryManifest', () => {
     const [item] = await buildGalleryManifest({ galleryDir, biblioDir });
 
     expect(item.medium).toBe('3d');
+    expect(item.mediaType).toBe('scene');
+  });
+
+  test('normalizes a 3D turntable sequence without exposing source geometry', async () => {
+    const { galleryDir, biblioDir } = await makeContentTree();
+    await writeFile(path.join(galleryDir, '413th-oc.webp'), 'image');
+    await writeFile(
+      path.join(biblioDir, '413th-oc.json'),
+      JSON.stringify({
+        medium: '3d',
+        mediaType: 'turntable',
+        media: {
+          framePattern: 'turntables/413th/413th_{frame}.webp',
+          frameCount: 48,
+          startFrame: 0,
+          framePadding: 4,
+        },
+      }),
+    );
+
+    const [item] = await buildGalleryManifest({ galleryDir, biblioDir });
+
+    expect(item).toMatchObject({
+      medium: '3d',
+      mediaType: 'turntable',
+      media: {
+        framePattern: 'turntables/413th/413th_{frame}.webp',
+        frameCount: 48,
+        startFrame: 0,
+        framePadding: 4,
+      },
+    });
+    expect(JSON.stringify(item)).not.toMatch(/blend|fbx|glb|texture/i);
+  });
+
+  test('normalizes a lazy video source for a motion entry', async () => {
+    const { galleryDir, biblioDir } = await makeContentTree();
+    await writeFile(path.join(galleryDir, 'freezer-loop.webp'), 'image');
+    await writeFile(
+      path.join(biblioDir, 'freezer-loop.json'),
+      JSON.stringify({
+        medium: '3d',
+        mediaType: 'video',
+        media: { src: 'media/video/freezer-loop.mp4' },
+      }),
+    );
+
+    const [item] = await buildGalleryManifest({ galleryDir, biblioDir });
+
+    expect(item.mediaType).toBe('video');
+    expect(item.media).toEqual({ src: 'media/video/freezer-loop.mp4' });
+  });
+
+  test('falls back to a still scene when media metadata contains an unsafe path', async () => {
+    const { galleryDir, biblioDir } = await makeContentTree();
+    await writeFile(path.join(galleryDir, 'unsafe-video.webp'), 'image');
+    await writeFile(
+      path.join(biblioDir, 'unsafe-video.json'),
+      JSON.stringify({
+        medium: '3d',
+        mediaType: 'video',
+        media: { src: '../private/source.mp4' },
+      }),
+    );
+
+    const [item] = await buildGalleryManifest({ galleryDir, biblioDir });
+
+    expect(item.mediaType).toBe('scene');
+    expect(item.media).toBeNull();
   });
 
   test('includes a linked character credit from artwork metadata', async () => {

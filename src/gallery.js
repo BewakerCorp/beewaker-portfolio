@@ -122,11 +122,53 @@ const GALLERY_MEDIUMS = Object.freeze([
   }),
 ]);
 
+const THREE_DIMENSIONAL_MEDIA = Object.freeze([
+  Object.freeze({
+    mediaType: 'turntable',
+    title: 'CHARACTERS / 360°',
+    emptyMessage: 'No character turntables have been added yet.',
+  }),
+  Object.freeze({
+    mediaType: 'scene',
+    title: 'SCENES',
+    emptyMessage: 'No rendered scenes have been added yet.',
+  }),
+  Object.freeze({
+    mediaType: 'video',
+    title: 'MOTION',
+    emptyMessage: 'No motion studies have been added yet.',
+  }),
+]);
+
 export function groupGalleryItems(items = []) {
   return GALLERY_MEDIUMS.map((section) => ({
     ...section,
     items: items.filter((item) => (item.medium === '3d' ? '3d' : '2d') === section.medium),
   }));
+}
+
+export function groupThreeDimensionalItems(items = []) {
+  return THREE_DIMENSIONAL_MEDIA.map((section) => ({
+    ...section,
+    items: items.filter((item) => {
+      const mediaType = ['turntable', 'video'].includes(item.mediaType) ? item.mediaType : 'scene';
+      return mediaType === section.mediaType;
+    }),
+  }));
+}
+
+export function getGalleryActionLabel(item = {}) {
+  if (item.mediaType === 'turntable') return 'rotate 360° ↗';
+  if (item.mediaType === 'scene') return 'inspect scene ↗';
+  if (item.mediaType === 'video') return 'play loop ↗';
+  return 'inspect ↗';
+}
+
+export function getGalleryCardAriaLabel(item = {}) {
+  if (item.mediaType === 'turntable') return `Rotate ${item.title} in 360 degrees`;
+  if (item.mediaType === 'scene') return `Inspect scene ${item.title}`;
+  if (item.mediaType === 'video') return `Play loop ${item.title}`;
+  return `Inspect ${item.title}`;
 }
 
 function markGalleryCardReady(card) {
@@ -139,7 +181,7 @@ function createGalleryCard(item, index, baseUrl, onSelect) {
   card.type = 'button';
   card.dataset.artId = item.id;
   card.style.setProperty('--entry-delay', `${Math.min(index * 45, 360)}ms`);
-  card.setAttribute('aria-label', `Inspect ${item.title}`);
+  card.setAttribute('aria-label', getGalleryCardAriaLabel(item));
 
   const frame = document.createElement('span');
   frame.className = 'art-card__frame';
@@ -150,8 +192,9 @@ function createGalleryCard(item, index, baseUrl, onSelect) {
 
   const label = document.createElement('span');
   label.className = 'art-card__label';
-  label.innerHTML = `<small>${String(index + 1).padStart(2, '0')}</small><strong></strong><i>inspect ↗</i>`;
+  label.innerHTML = `<small>${String(index + 1).padStart(2, '0')}</small><strong></strong><i></i>`;
   label.querySelector('strong').textContent = item.title;
+  label.querySelector('i').textContent = getGalleryActionLabel(item);
 
   frame.append(image);
   card.append(frame, label);
@@ -285,6 +328,38 @@ export function renderGallery(container, items, onSelect = () => {}, baseUrl = '
       const message = document.createElement('p');
       message.textContent = emptyMessage;
       sectionContent.append(message);
+    } else if (medium === '3d') {
+      sectionContent.className = 'gallery-subsections';
+      groupThreeDimensionalItems(sectionItems).forEach((mediaSection) => {
+        const subsection = document.createElement('section');
+        subsection.className = 'gallery-subsection';
+        subsection.dataset.mediaType = mediaSection.mediaType;
+
+        const subsectionHeading = document.createElement('div');
+        subsectionHeading.className = 'gallery-subsection__heading';
+        const subsectionTitle = document.createElement('h3');
+        subsectionTitle.className = 'gallery-subsection__title';
+        subsectionTitle.textContent = mediaSection.title;
+        const subsectionCount = document.createElement('small');
+        subsectionCount.textContent = String(mediaSection.items.length).padStart(2, '0');
+        subsectionHeading.append(subsectionTitle, subsectionCount);
+
+        const subsectionContent = document.createElement('div');
+        if (mediaSection.items.length === 0) {
+          subsectionContent.className = 'gallery-state gallery-state--empty gallery-state--subsection';
+          const message = document.createElement('p');
+          message.textContent = mediaSection.emptyMessage;
+          subsectionContent.append(message);
+        } else {
+          subsectionContent.className = 'gallery-grid gallery-grid--pending gallery-grid--media';
+          mediaSection.items.forEach((item, index) => {
+            subsectionContent.append(createGalleryCard(item, index, baseUrl, onSelect));
+          });
+        }
+
+        subsection.append(subsectionHeading, subsectionContent);
+        sectionContent.append(subsection);
+      });
     } else {
       sectionContent.className = 'gallery-grid gallery-grid--pending';
       sectionItems.forEach((item, index) => {

@@ -31,12 +31,24 @@ describe('mobile inspector and commissions layout', () => {
   test('hides desktop-only inspector hints on coarse pointers', () => {
     expect(css).toMatch(/@media\s*\(pointer:\s*coarse\)[\s\S]*?\.inspector__controls span/);
   });
+
+  test('lays out turntables with a stage, details, and scrubber', () => {
+    expect(css).toMatch(/\.media-inspector--turntable\s*\{/);
+    expect(css).toMatch(/\.media-inspector__details\s*\{/);
+    expect(css).toMatch(/\.media-inspector__scrubber\s*\{/);
+  });
 });
 
 describe('portfolio medium sections', () => {
   test('styles visible section headings separately from masonry grids', () => {
     expect(css).toMatch(/\.gallery-section__title\s*\{/);
     expect(css).toMatch(/\.gallery-section\s*\+\s*\.gallery-section/);
+  });
+
+  test('gives 3D media its own visible subsection hierarchy', () => {
+    expect(css).toMatch(/\.gallery-subsections\s*\{/);
+    expect(css).toMatch(/\.gallery-subsection__title\s*\{/);
+    expect(css).toMatch(/\.gallery-subsection\[data-media-type='turntable'\]/);
   });
 });
 

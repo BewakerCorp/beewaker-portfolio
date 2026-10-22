@@ -1,0 +1,11 @@
+{
+  "title": "Tesla / Image-plane study",
+  "year": 2026,
+  "category": "oc",
+  "medium": "3d",
+  "mediaType": "video",
+  "description": "A motion and compositing study built with illustrated image planes inside a 3D scene.",
+  "media": {
+    "src": "media/video/tesla-image-plane-study.mp4"
+  }
+}

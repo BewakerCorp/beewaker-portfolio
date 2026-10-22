@@ -104,6 +104,55 @@ describe('gallery medium sections', () => {
       items: [],
     });
   });
+
+  test('groups 3D records into turntables, scenes, and motion in a stable order', () => {
+    const character = { id: 'character', medium: '3d', mediaType: 'turntable' };
+    const still = { id: 'still', medium: '3d', mediaType: 'scene' };
+    const legacyRender = { id: 'legacy-render', medium: '3d' };
+    const motion = { id: 'motion', medium: '3d', mediaType: 'video' };
+
+    expect(
+      galleryModule.groupThreeDimensionalItems?.([motion, still, character, legacyRender]),
+    ).toEqual([
+      {
+        mediaType: 'turntable',
+        title: 'CHARACTERS / 360°',
+        emptyMessage: 'No character turntables have been added yet.',
+        items: [character],
+      },
+      {
+        mediaType: 'scene',
+        title: 'SCENES',
+        emptyMessage: 'No rendered scenes have been added yet.',
+        items: [still, legacyRender],
+      },
+      {
+        mediaType: 'video',
+        title: 'MOTION',
+        emptyMessage: 'No motion studies have been added yet.',
+        items: [motion],
+      },
+    ]);
+  });
+
+  test.each([
+    [{ mediaType: 'turntable' }, 'rotate 360° ↗'],
+    [{ mediaType: 'scene' }, 'inspect scene ↗'],
+    [{ mediaType: 'video' }, 'play loop ↗'],
+    [{ mediaType: 'artwork' }, 'inspect ↗'],
+    [{}, 'inspect ↗'],
+  ])('uses a media-specific card action', (item, expected) => {
+    expect(galleryModule.getGalleryActionLabel?.(item)).toBe(expected);
+  });
+
+  test.each([
+    [{ title: '413th OC', mediaType: 'turntable' }, 'Rotate 413th OC in 360 degrees'],
+    [{ title: 'Laboratory', mediaType: 'scene' }, 'Inspect scene Laboratory'],
+    [{ title: 'Freezer', mediaType: 'video' }, 'Play loop Freezer'],
+    [{ title: 'Sketch' }, 'Inspect Sketch'],
+  ])('uses a clear accessible card label', (item, expected) => {
+    expect(galleryModule.getGalleryCardAriaLabel?.(item)).toBe(expected);
+  });
 });
 
 describe('loadGalleryManifest', () => {

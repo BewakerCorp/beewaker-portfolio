@@ -1,0 +1,15 @@
+{
+  "title": "Sunny OC rework",
+  "year": 2026,
+  "category": "oc",
+  "medium": "3d",
+  "mediaType": "turntable",
+  "characters": ["Sunny", "Gribobas"],
+  "description": "Sunny is a mycologist working at the SIOS-1 station laboratory. Her main responsibility is studying specimens from the Zone, but since the higher-ups barely pay any attention to SIOS-1, she spends most of her time working on her own projects and experiments. One of her earliest creations is a creature named Gribobas.\n\nGribobas is a sentient humanoid mushroom grown by Sunny to help her with experiments and handle heavy lifting around the storage areas. Unfortunately, his mental development never progressed beyond that of a five-year-old child. He understands simple things well enough, but anything more complicated tends to go over his head. He can easily get upset or offended over the smallest things.",
+  "media": {
+    "framePattern": "turntables/sunny/Sunny_{frame}.webp",
+    "frameCount": 48,
+    "startFrame": 0,
+    "framePadding": 4
+  }
+}

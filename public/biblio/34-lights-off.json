@@ -1,0 +1,11 @@
+{
+  "title": "Lights Off",
+  "year": 2026,
+  "category": "oc",
+  "medium": "3d",
+  "mediaType": "video",
+  "characters": ["Sunny"],
+  "media": {
+    "src": "media/video/lights-off.mp4"
+  }
+}

@@ -7,6 +7,7 @@ const MEDIUM_ORDER = new Map([
   ['2d', 0],
   ['3d', 1],
 ]);
+const MEDIA_TYPES = new Set(['turntable', 'scene', 'video']);
 const CATEGORY_ORDER = new Map([
   ['oc', 0],
   ['fanart', 1],
@@ -85,6 +86,56 @@ function normalizeMedium(medium) {
   return MEDIUM_ORDER.has(value) ? value : '2d';
 }
 
+function normalizePublicAssetPath(value) {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim().replaceAll('\\', '/');
+  if (!trimmed || trimmed.startsWith('/') || trimmed.includes('\0')) return null;
+
+  const normalized = path.posix.normalize(trimmed);
+  if (normalized === '..' || normalized.startsWith('../')) return null;
+  return normalized;
+}
+
+function normalizeMedia(metadata, medium) {
+  if (medium !== '3d') return { mediaType: 'artwork', media: null };
+
+  const requestedType = typeof metadata.mediaType === 'string'
+    ? metadata.mediaType.trim().toLowerCase()
+    : '';
+  const mediaType = MEDIA_TYPES.has(requestedType) ? requestedType : 'scene';
+  const media = metadata.media && typeof metadata.media === 'object' ? metadata.media : {};
+
+  if (mediaType === 'turntable') {
+    const framePattern = normalizePublicAssetPath(media.framePattern);
+    const frameCount = Number.isInteger(media.frameCount) && media.frameCount > 1 && media.frameCount <= 360
+      ? media.frameCount
+      : 0;
+    if (!framePattern?.includes('{frame}') || !frameCount) {
+      return { mediaType: 'scene', media: null };
+    }
+
+    return {
+      mediaType,
+      media: {
+        framePattern,
+        frameCount,
+        startFrame: Number.isInteger(media.startFrame) && media.startFrame >= 0 ? media.startFrame : 0,
+        framePadding: Number.isInteger(media.framePadding) && media.framePadding >= 1 && media.framePadding <= 8
+          ? media.framePadding
+          : 4,
+      },
+    };
+  }
+
+  if (mediaType === 'video') {
+    const src = normalizePublicAssetPath(media.src);
+    if (!src) return { mediaType: 'scene', media: null };
+    return { mediaType, media: { src } };
+  }
+
+  return { mediaType: 'scene', media: null };
+}
+
 function arrangeSeries(records) {
   const anchors = new Map();
 
@@ -158,12 +209,15 @@ export async function buildGalleryManifest({ galleryDir, biblioDir }) {
       const stem = path.basename(filename, extension);
       const metadata = await readMetadata(path.join(biblioDir, `${stem}.json`));
       const backImage = await findBackImage({ stem, metadata, biblioDir, biblioFiles });
+      const medium = normalizeMedium(metadata.medium);
+      const normalizedMedia = normalizeMedia(metadata, medium);
 
       return {
         sourceIndex,
         series: normalizeSeries(metadata),
         category: normalizeCategory(metadata.category),
-        medium: normalizeMedium(metadata.medium),
+        medium,
+        ...normalizedMedia,
         id: stem,
         title: typeof metadata.title === 'string' && metadata.title.trim()
           ? metadata.title.trim()

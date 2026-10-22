@@ -1,0 +1,15 @@
+{
+  "title": "413th OC",
+  "year": 2026,
+  "category": "oc",
+  "medium": "3d",
+  "mediaType": "turntable",
+  "characters": ["413th"],
+  "description": "413th is a young woman from... some station. Which one? She won't say.\n\nHer research has something to do with human souls. Doesn't sound very scientific, but she still gets paid for it, and sometimes even receives extra funding for her experiments... Strange.\n\nShe speaks softly and always carries a cassette player. She also never goes anywhere without her phone. Stations issue special work phones that can only be used to communicate with other personnel within the Zone. But apparently, she's tampered with hers somehow, and now she can make calls to people outside the Zone, too. Even to their regular phones.\n\n\"She's a strange one. She gets away with all sorts of things, almost as if she doesn't even exist.\"",
+  "media": {
+    "framePattern": "turntables/413th/413th_{frame}.webp",
+    "frameCount": 48,
+    "startFrame": 0,
+    "framePadding": 4
+  }
+}

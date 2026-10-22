@@ -287,13 +287,14 @@
           <p class="inspector__status" data-inspector-status aria-live="polite">Loading visual record…</p>
         </div>
 
-        <footer class="inspector__controls" aria-label="Artwork inspection controls">
-          <span><kbd>DRAG</kbd> ROTATE</span>
-          <span><kbd>SHIFT + DRAG</kbd> ROLL</span>
-          <span><kbd>DOUBLE CLICK</kbd> RESET</span>
-          <button class="inspector__flip" type="button" data-inspector-flip>
+        <footer class="inspector__controls" aria-label="Visual record controls" data-inspector-controls>
+          <span data-inspector-artwork-control><kbd>DRAG</kbd> ROTATE</span>
+          <span data-inspector-artwork-control><kbd>SHIFT + DRAG</kbd> ROLL</span>
+          <span data-inspector-artwork-control><kbd>DOUBLE CLICK</kbd> RESET</span>
+          <button class="inspector__flip" type="button" data-inspector-flip data-inspector-artwork-control>
             <kbd>ENTER</kbd> FLIP CARD
           </button>
+          <span class="inspector__media-hint" data-inspector-media-hint hidden></span>
           <span><kbd>ESC</kbd> CLOSE</span>
         </footer>
       </article>
