@@ -37,6 +37,12 @@ describe('mobile inspector and commissions layout', () => {
     expect(css).toMatch(/\.media-inspector__details\s*\{/);
     expect(css).toMatch(/\.media-inspector__scrubber\s*\{/);
   });
+
+  test('sizes video inspector windows from the loaded media aspect ratio', () => {
+    expect(declarationsFor(".inspector__window[data-media-fit='video']")).toMatchObject({
+      width: expect.stringContaining('--inspector-media-aspect'),
+    });
+  });
 });
 
 describe('portfolio medium sections', () => {

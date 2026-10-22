@@ -52,6 +52,21 @@ export function resolveMediaAsset(baseUrl, relativePath) {
   return `${baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`}${relativePath}`;
 }
 
+export function applyVideoWindowAspect(viewport, videoWidth, videoHeight) {
+  const inspectorWindow = viewport?.closest?.('.inspector__window');
+  const aspectRatio = Number(videoWidth) / Number(videoHeight);
+
+  if (!inspectorWindow || !Number.isFinite(aspectRatio) || aspectRatio <= 0) return () => {};
+
+  inspectorWindow.dataset.mediaFit = 'video';
+  inspectorWindow.style.setProperty('--inspector-media-aspect', String(aspectRatio));
+
+  return () => {
+    delete inspectorWindow.dataset.mediaFit;
+    inspectorWindow.style.removeProperty('--inspector-media-aspect');
+  };
+}
+
 function createDetails(documentRoot, item, label) {
   const details = documentRoot.createElement('aside');
   details.className = 'media-inspector__details';
@@ -281,11 +296,19 @@ function createVideoView({ item, viewport, baseUrl, setStatus }) {
   root.append(video);
   viewport.append(root);
 
+  let restoreWindowAspect = () => {};
+
+  const onLoadedMetadata = () => {
+    restoreWindowAspect();
+    restoreWindowAspect = applyVideoWindowAspect(viewport, video.videoWidth, video.videoHeight);
+  };
+
   const onCanPlay = () => {
     setStatus('', 'ready');
     video.play().catch(() => {});
   };
   const onError = () => setStatus('This motion record could not be loaded.', 'error');
+  video.addEventListener('loadedmetadata', onLoadedMetadata);
   video.addEventListener('canplay', onCanPlay);
   video.addEventListener('error', onError);
   video.load();
@@ -293,8 +316,10 @@ function createVideoView({ item, viewport, baseUrl, setStatus }) {
   return {
     initialFocus: video,
     cleanup() {
+      video.removeEventListener('loadedmetadata', onLoadedMetadata);
       video.removeEventListener('canplay', onCanPlay);
       video.removeEventListener('error', onError);
+      restoreWindowAspect();
       video.pause();
       video.removeAttribute('src');
       video.load();

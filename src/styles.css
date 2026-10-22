@@ -202,6 +202,14 @@ button:focus-visible {
   animation: inspector-window-in 260ms ease both;
 }
 
+.inspector__window[data-media-fit='video'] {
+  width: min(
+    94vw,
+    1180px,
+    max(34rem, calc((min(850px, 92dvh) - 121px) * var(--inspector-media-aspect)))
+  );
+}
+
 .inspector__header {
   display: grid;
   grid-template-columns: 1fr auto auto;
@@ -1739,7 +1747,8 @@ h1 {
     padding: 0;
   }
 
-  .inspector__window {
+  .inspector__window,
+  .inspector__window[data-media-fit='video'] {
     width: 100vw;
     height: 100vh;
     height: 100dvh;

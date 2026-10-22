@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import {
+  applyVideoWindowAspect,
   frameIndexFromDrag,
   framePath,
   getInspectorMode,
@@ -39,6 +40,35 @@ describe('turntable frame addressing', () => {
     const order = prefetchOrder(0, 8);
     expect(order.slice(0, 5)).toEqual([0, 1, 7, 2, 6]);
     expect(new Set(order).size).toBe(8);
+  });
+
+  test('fits the inspector window to a video intrinsic aspect ratio and restores it on cleanup', () => {
+    const properties = new Map();
+    const inspectorWindow = {
+      dataset: {},
+      style: {
+        setProperty(name, value) {
+          properties.set(name, value);
+        },
+        removeProperty(name) {
+          properties.delete(name);
+        },
+      },
+    };
+    const viewport = {
+      closest(selector) {
+        return selector === '.inspector__window' ? inspectorWindow : null;
+      },
+    };
+
+    const restore = applyVideoWindowAspect(viewport, 1920, 1920);
+
+    expect(inspectorWindow.dataset.mediaFit).toBe('video');
+    expect(properties.get('--inspector-media-aspect')).toBe('1');
+
+    restore();
+    expect(inspectorWindow.dataset.mediaFit).toBeUndefined();
+    expect(properties.has('--inspector-media-aspect')).toBe(false);
   });
 });
 
