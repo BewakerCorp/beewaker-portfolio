@@ -57,11 +57,15 @@ describe('SOCIAL_LINKS', () => {
     expect(new Set(SOCIAL_LINKS.map((social) => social.href)).size).toBe(SOCIAL_LINKS.length);
   });
 
-  test('marks the old Commissions.gg destination as unavailable without removing its link', () => {
-    expect(SOCIAL_LINKS.find((social) => social.id === 'commissions')).toMatchObject({
-      href: 'https://www.commissions.gg/beewaker',
-      unavailable: true,
+  test('includes YCH Commishes profile', () => {
+    const ych = SOCIAL_LINKS.find((social) => social.id === 'ych');
+
+    expect(ych).toMatchObject({
+      mark: 'Yc',
+      label: 'YCH Commishes',
+      href: 'https://portfolio.commishes.com/user/Beewaker/',
     });
+    expect(ych.unavailable).toBeUndefined();
   });
 
   test('strips copied share-tracking parameters from TikTok profile URLs', () => {
